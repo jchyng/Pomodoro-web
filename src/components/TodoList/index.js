@@ -1,22 +1,26 @@
 import React, { useState } from "react";
+import {
+  SortableContext,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
+import { useDroppable } from "@dnd-kit/core";
+import { FaPlus } from "react-icons/fa";
+import TodoItem from "./TodoItem";
 import styles from "./TodoList.module.css";
-import { FaPlus, FaTrash } from "react-icons/fa";
 
-const TodoItem = ({ content, isCompleted, onToggle, onDelete }) => (
-  <div className={`${styles.todoItem} ${isCompleted ? styles.completed : ""}`}>
-    <label className={styles.checkbox}>
-      <input type="checkbox" checked={isCompleted} onChange={onToggle} />
-      <span className={styles.checkmark}></span>
-    </label>
-    <span className={styles.content}>{content}</span>
-    <button className={styles.deleteButton} onClick={onDelete}>
-      <FaTrash />
-    </button>
-  </div>
-);
-
-const TodoList = ({ title, todos, onToggle, onAdd, onDelete }) => {
+const TodoList = ({
+  id,
+  title,
+  todos,
+  onToggle,
+  onAdd,
+  onDelete,
+  emptyMessage,
+}) => {
   const [newTodo, setNewTodo] = useState("");
+  const { setNodeRef } = useDroppable({
+    id: id,
+  });
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -41,16 +45,27 @@ const TodoList = ({ title, todos, onToggle, onAdd, onDelete }) => {
           <FaPlus />
         </button>
       </form>
-      <div className={styles.list}>
-        {todos.map((todo) => (
-          <TodoItem
-            key={todo.id}
-            content={todo.content}
-            isCompleted={todo.isCompleted}
-            onToggle={() => onToggle(todo.id)}
-            onDelete={() => onDelete(todo.id)}
-          />
-        ))}
+      <div ref={setNodeRef} className={styles.list}>
+        <SortableContext
+          items={todos.map((todo) => todo.id)}
+          strategy={verticalListSortingStrategy}
+        >
+          {todos.map((todo) => (
+            <TodoItem
+              key={todo.id}
+              id={todo.id}
+              content={todo.content}
+              isCompleted={todo.isCompleted}
+              onToggle={() => onToggle(todo.id)}
+              onDelete={() => onDelete(todo.id)}
+            />
+          ))}
+        </SortableContext>
+        {todos.length === 0 && (
+          <div className={styles.emptyList}>
+            <p>{emptyMessage}</p>
+          </div>
+        )}
       </div>
     </div>
   );

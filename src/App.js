@@ -1,12 +1,12 @@
 import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import TimerPage from "./pages/TimerPage";
+import PomodoroPage from "./pages/PomodoroPage";
 
 function App() {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<TimerPage />} />
+        <Route path="/" element={<PomodoroPage />} />
       </Routes>
     </Router>
   );
