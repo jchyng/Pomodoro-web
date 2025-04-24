@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { DndContext, DragOverlay, closestCenter } from "@dnd-kit/core";
+import { DndContext, DragOverlay, closestCorners } from "@dnd-kit/core";
 import { arrayMove } from "@dnd-kit/sortable";
 import styles from "./PomodoroPage.module.css";
 import Timer from "../../components/Timer";
@@ -135,7 +135,7 @@ const PomodoroPage = () => {
         <DndContext
           onDragStart={handleDragStart}
           onDragEnd={handleDragEnd}
-          collisionDetection={closestCenter}
+          collisionDetection={closestCorners}
         >
           <div className={styles.todoSection}>
             <TodoList
