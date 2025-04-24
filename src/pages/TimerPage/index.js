@@ -30,6 +30,28 @@ const TimerPage = () => {
     );
   };
 
+  const handleTodayTodoAdd = (content) => {
+    setTodayTodos((prev) => [
+      ...prev,
+      { id: Date.now(), content, isCompleted: false },
+    ]);
+  };
+
+  const handleCurrentTodoAdd = (content) => {
+    setCurrentTodos((prev) => [
+      ...prev,
+      { id: Date.now(), content, isCompleted: false },
+    ]);
+  };
+
+  const handleTodayTodoDelete = (id) => {
+    setTodayTodos((prev) => prev.filter((todo) => todo.id !== id));
+  };
+
+  const handleCurrentTodoDelete = (id) => {
+    setCurrentTodos((prev) => prev.filter((todo) => todo.id !== id));
+  };
+
   return (
     <div className={styles.container}>
       <div className={styles.content}>
@@ -41,11 +63,15 @@ const TimerPage = () => {
             title="오늘의 할 일"
             todos={todayTodos}
             onToggle={handleTodayTodoToggle}
+            onAdd={handleTodayTodoAdd}
+            onDelete={handleTodayTodoDelete}
           />
           <TodoList
             title="현재 작업"
             todos={currentTodos}
             onToggle={handleCurrentTodoToggle}
+            onAdd={handleCurrentTodoAdd}
+            onDelete={handleCurrentTodoDelete}
           />
         </div>
       </div>
