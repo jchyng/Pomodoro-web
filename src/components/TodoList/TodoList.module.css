@@ -1,18 +1,19 @@
 .todoList {
-  background-color: #fff;
-  border-radius: 16px;
-  padding: 1.5rem;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  background-color: var(--system-white);
+  border-radius: var(--radius-lg);
+  padding: 2rem;
+  box-shadow: var(--shadow-lg);
   width: 100%;
   max-width: 600px;
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .title {
   font-size: 1.25rem;
   font-weight: 600;
-  color: #1d1d1f;
+  color: var(--system-black);
   margin-bottom: 1.25rem;
   letter-spacing: -0.01em;
 }
@@ -27,23 +28,23 @@
 .addInput {
   flex: 1;
   padding: 0.875rem 1rem;
-  border: 1px solid #d2d2d7;
-  border-radius: 12px;
+  border: 1px solid var(--system-gray4);
+  border-radius: var(--radius-md);
   font-size: 1rem;
-  color: #1d1d1f;
+  color: var(--system-black);
   transition: all 0.2s;
-  background-color: #f5f5f7;
+  background-color: var(--system-gray2);
 }
 
 .addInput:focus {
   outline: none;
-  border-color: #0071e3;
+  border-color: var(--system-blue);
   box-shadow: 0 0 0 2px rgba(0, 113, 227, 0.2);
-  background-color: #fff;
+  background-color: var(--system-white);
 }
 
 .addInput::placeholder {
-  color: #86868b;
+  color: var(--system-gray);
 }
 
 .addButton {
@@ -51,9 +52,9 @@
   height: 44px;
   padding: 0;
   border: none;
-  border-radius: 12px;
-  background-color: #0071e3;
-  color: white;
+  border-radius: var(--radius-md);
+  background-color: var(--system-blue);
+  color: var(--system-white);
   cursor: pointer;
   transition: all 0.2s;
   display: flex;
@@ -76,14 +77,14 @@
   flex-direction: column;
   gap: 0.75rem;
   min-height: 100px;
-  border: 2px dashed #d2d2d7;
-  border-radius: 12px;
+  border: 2px dashed var(--system-gray4);
+  border-radius: var(--radius-md);
   padding: 1rem;
   transition: all 0.2s;
 }
 
 .list:empty {
-  border: 2px dashed #d2d2d7;
+  border: 2px dashed var(--system-gray4);
 }
 
 .emptyList {
@@ -91,11 +92,11 @@
   align-items: center;
   justify-content: center;
   height: 100px;
-  color: #86868b;
+  color: var(--system-gray);
   font-size: 0.9rem;
   text-align: center;
-  background-color: #f5f5f7;
-  border-radius: 8px;
+  background-color: var(--system-gray2);
+  border-radius: var(--radius-md);
   margin: 0.5rem 0;
 }
 
@@ -104,14 +105,14 @@
   align-items: center;
   gap: 0.75rem;
   padding: 0.875rem 1rem;
-  background-color: #f5f5f7;
-  border-radius: 12px;
+  background-color: var(--system-gray2);
+  border-radius: var(--radius-md);
   transition: all 0.2s;
   position: relative;
 }
 
 .todoItem:hover {
-  background-color: #e9e9eb;
+  background-color: var(--system-gray3);
   transform: translateY(-1px);
 }
 
@@ -126,7 +127,7 @@
 
 .todoItem.completed .content {
   text-decoration: line-through;
-  color: #86868b;
+  color: var(--system-gray);
 }
 
 .checkbox {
@@ -150,15 +151,15 @@
   left: 0;
   width: 22px;
   height: 22px;
-  background-color: #fff;
-  border: 1px solid #d2d2d7;
-  border-radius: 50%;
+  background-color: var(--system-white);
+  border: 1px solid var(--system-gray4);
+  border-radius: var(--radius-full);
   transition: all 0.2s;
 }
 
 .checkbox input:checked + .checkmark {
-  background-color: #34c759;
-  border-color: #34c759;
+  background-color: var(--system-green);
+  border-color: var(--system-green);
 }
 
 .checkmark:after {
@@ -169,7 +170,7 @@
   top: 3px;
   width: 6px;
   height: 12px;
-  border: solid white;
+  border: solid var(--system-white);
   border-width: 0 2px 2px 0;
   transform: rotate(45deg);
 }
@@ -180,7 +181,7 @@
 
 .content {
   font-size: 1rem;
-  color: #1d1d1f;
+  color: var(--system-black);
   word-break: break-word;
   line-height: 1.4;
 }
@@ -190,9 +191,9 @@
   height: 32px;
   padding: 0;
   border: none;
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   background-color: transparent;
-  color: #86868b;
+  color: var(--system-gray);
   cursor: pointer;
   transition: all 0.2s;
   display: flex;
@@ -207,8 +208,8 @@
 }
 
 .deleteButton:hover {
-  background-color: #ff3b30;
-  color: white;
+  background-color: var(--system-red);
+  color: var(--system-white);
   transform: scale(1.1);
   opacity: 1;
 }

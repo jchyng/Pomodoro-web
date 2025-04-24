@@ -27,13 +27,13 @@ const PomodoroSettings = ({
 }) => (
   <div className={styles.settings}>
     <PomodoroInput
-      label="작업 시간 (분)"
+      label="작업 시간"
       value={workTime}
       onChange={onWorkTimeChange}
       disabled={isRunning}
     />
     <PomodoroInput
-      label="휴식 시간 (분)"
+      label="휴식 시간"
       value={breakTime}
       onChange={onBreakTimeChange}
       disabled={isRunning}

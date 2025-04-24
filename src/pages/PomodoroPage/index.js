@@ -179,3 +179,6 @@ const PomodoroPage = () => {
 };
 
 export default PomodoroPage;
+
+//TODO: 데스크탑 화면에서 현재 작업을 Timer 하단에 배치하고 오늘의 할 일을 타이머 우측에 배치
+//TODO: 모바일 화면에서는 현재 작업 하단에 오늘 할 일 배치
