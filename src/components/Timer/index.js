@@ -61,14 +61,16 @@ const Timer = () => {
     setIsAuto(!isAuto);
   };
 
-  const resetTimer = (resetCurrentPomodoro = false) => {
+  const initTimer = () => {
+    setIsRunning(false);
+    setTime(isBreakTime ? breakTime * 60 : workTime * 60);
+  };
+
+  const resetTimer = () => {
     setIsRunning(false);
     setTime(workTime * 60);
     setIsBreakTime(false);
-
-    if (resetCurrentPomodoro) {
-      setCurrentPomodoro(0);
-    }
+    setCurrentPomodoro(0);
   };
 
   // 시간 포맷팅 => MM:ss
@@ -141,7 +143,7 @@ const Timer = () => {
         </button>
 
         <button
-          onClick={() => resetTimer(false)}
+          onClick={initTimer}
           className={styles.button}
           title="현재 시간만 초기화"
         >
@@ -149,9 +151,9 @@ const Timer = () => {
         </button>
 
         <button
-          onClick={() => resetTimer(true)}
+          onClick={resetTimer}
           className={styles.button}
-          title="모든 설정 초기화"
+          title="뽀모도로 전체 초기화"
         >
           <FaHistory />
         </button>
