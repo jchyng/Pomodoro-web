@@ -1,70 +1,65 @@
-# Getting Started with Create React App
+### 뽀모도로
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+1. 작업 타이머
+2. 휴식 타이머
+3. 오늘 할 일 작성
+4. 현재 뽀모도로에서 할 일을 오늘 할 일에서 드래그해서 가져온 다음 드롭해서 추가
+5. 설정
 
-## Available Scripts
+- 작업 시간, 휴식 시간
+- 목표 뽀모도로 횟수 설정
+- 목표 횟수는 반드시 설정해야함
+- 한번 설정하면 바꿀 수 없음
+- 설정할 때 정말로 할 것인지, 바꿀 수 없다는 확인 창을 띄워야함
 
-In the project directory, you can run:
+6. 목표 뽀모도로 횟수 도달 시 완료 메세지 - 알림음 필요요
 
-### `npm start`
+### 기록
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+1. 달력을 통해 년도, 월을 선택할 수 있고, 7\*5로 항상 이전 달과 다음 달도 선택할 수 있음
+2. 그 날의 뽀모도로 기록
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+- 작업 시작 시간
+- 작업 진행 시간
+- 휴식 시작 시간
+- 휴식 진행 시간
+- 작업 내용
+- 뽀모도로 횟수
+- 총 작업 시간
 
-### `npm test`
+# 화면 구성
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+1. 타이머 페이지 url: "/"
+2. 기록 페이지 url "/calendar"
 
-### `npm run build`
+# 디자인
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+1. 다크모드 지원
+2. 반응형 디자인 지원
+3. 기본적으로 모바일 형태의 디자인
+4. SEO 최적화
+5. 모바일 환경에서 가로로 두었을 때 시계 형태 지원
+6. 심플하고 예쁜 디자인
+7. 작업 시간과 휴식 시간의 색상 테마가 대비되는 효과
+8. 타이머는 시간만 가는 것이 아닌 progress를 볼 수 있어야함
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+# 테스트
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+1. 모든 기능에 대한 단위 테스트 작성
 
-### `npm run eject`
+# 작업
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+하나의 파일에는 하나의 역할만 가지도록
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+App.js에는 Router만 두고 Navigation은 Component로 분리
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+src
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+- Page
+- Component
+- Context
+- Hooks
 
-## Learn More
+기능 하나씩 개발
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+Module.css
