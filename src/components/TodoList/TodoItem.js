@@ -25,19 +25,21 @@ const TodoItem = ({ id, content, isCompleted, onToggle, onDelete }) => {
       ref={setNodeRef}
       style={style}
       className={`${styles.todoItem} ${isCompleted ? styles.completed : ""}`}
-      {...attributes}
-      {...listeners}
     >
-      <label className={styles.checkbox}>
-        <input
-          type="checkbox"
-          defaultChecked={isCompleted}
-          onChange={onToggle}
-        />
+      <label className={styles.checkbox} onClick={(e) => e.stopPropagation()}>
+        <input type="checkbox" checked={isCompleted} onChange={onToggle} />
         <span className={styles.checkmark}></span>
       </label>
-      <span className={styles.content}>{content}</span>
-      <button className={styles.deleteButton} onClick={() => onDelete(id)}>
+      <span className={styles.content} {...attributes} {...listeners}>
+        {content}
+      </span>
+      <button
+        className={styles.deleteButton}
+        onClick={(e) => {
+          e.stopPropagation();
+          onDelete(id);
+        }}
+      >
         <FaTrash />
       </button>
     </div>

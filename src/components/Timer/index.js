@@ -4,7 +4,13 @@ import PomodoroSettings from "../PomodoroSettings";
 import { FaPlay, FaPause, FaUndo, FaHistory } from "react-icons/fa";
 import TodoList from "../TodoList";
 
-const Timer = ({ currentTodos, onTodoToggle, onTodoAdd, onTodoDelete }) => {
+const Timer = ({
+  currentTodos,
+  onTodoToggle,
+  onTodoAdd,
+  onTodoDelete,
+  onBreakEnd,
+}) => {
   const [workTime, setWorkTime] = useState(0.05);
   const [breakTime, setBreakTime] = useState(0.05);
   const [time, setTime] = useState(workTime * 60);
@@ -34,6 +40,7 @@ const Timer = ({ currentTodos, onTodoToggle, onTodoAdd, onTodoDelete }) => {
       if (isBreakTime) {
         setTime(workTime * 60);
         setIsBreakTime(false);
+        onBreakEnd();
       }
       // 작업 시간 종료
       else {
@@ -52,6 +59,7 @@ const Timer = ({ currentTodos, onTodoToggle, onTodoAdd, onTodoDelete }) => {
     targetPomodoroCount,
     isBreakTime,
     isAuto,
+    onBreakEnd,
   ]);
 
   const toggleTimer = () => {

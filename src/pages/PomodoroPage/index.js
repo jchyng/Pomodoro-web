@@ -127,6 +127,16 @@ const PomodoroPage = () => {
   };
 
   const handleTodoToggle = (list, id) => {
+    if (list === "current") {
+      // 현재 작업 목록의 할 일은 체크만 하고 이동하지 않음
+      setCurrentTodos((prev) =>
+        prev.map((todo) =>
+          todo.id === id ? { ...todo, isCompleted: !todo.isCompleted } : todo
+        )
+      );
+      return;
+    }
+
     const todo = findTodoById(id, list === "today" ? todayTodos : currentTodos);
 
     if (todo) {
@@ -134,11 +144,9 @@ const PomodoroPage = () => {
         // 완료된 할 일을 다시 미완료로
         setCompletedTodos((prev) => prev.filter((t) => t.id !== id));
         setTodayTodos((prev) => [...prev, { ...todo, isCompleted: false }]);
-      } else {
-        // 할 일을 완료 처리
-        const setSourceTodos =
-          list === "today" ? setTodayTodos : setCurrentTodos;
-        setSourceTodos((prev) => prev.filter((t) => t.id !== id));
+      } else if (list === "today") {
+        // 오늘의 할 일을 완료 처리
+        setTodayTodos((prev) => prev.filter((t) => t.id !== id));
         setCompletedTodos((prev) => [...prev, { ...todo, isCompleted: true }]);
       }
     }
@@ -160,6 +168,17 @@ const PomodoroPage = () => {
         ? setCurrentTodos
         : setCompletedTodos;
     setTodos((prev) => prev.filter((todo) => todo.id !== id));
+  };
+
+  const handleBreakEnd = () => {
+    // 현재 작업 목록에서 완료된 항목들을 찾아서 완료된 할 일로 이동
+    const completedItems = currentTodos.filter((todo) => todo.isCompleted);
+    const remainingItems = currentTodos.filter((todo) => !todo.isCompleted);
+
+    if (completedItems.length > 0) {
+      setCurrentTodos(remainingItems);
+      setCompletedTodos((prev) => [...prev, ...completedItems]);
+    }
   };
 
   const activeTodo =
@@ -186,6 +205,7 @@ const PomodoroPage = () => {
               currentTodos={currentTodos}
               onTodoToggle={(id) => handleTodoToggle("current", id)}
               onTodoDelete={(id) => handleTodoDelete("current", id)}
+              onBreakEnd={handleBreakEnd}
             />
           </div>
           <div className={styles.todoSection}>
