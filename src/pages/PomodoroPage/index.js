@@ -1,22 +1,29 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { DndContext, DragOverlay, closestCorners } from "@dnd-kit/core";
 import { arrayMove } from "@dnd-kit/sortable";
 import styles from "./PomodoroPage.module.css";
 import Timer from "../../components/Timer";
 import TodoList from "../../components/TodoList";
 import TodoItem from "../../components/TodoList/TodoItem";
+import { loadTodosFromStorage, saveTodosToStorage } from "../../utils/storage";
 
 const PomodoroPage = () => {
-  const [todayTodos, setTodayTodos] = useState([
-    { id: 1, content: "프로젝트 기획서 작성", isCompleted: false },
-    { id: 2, content: "디자인 시스템 구축", isCompleted: false },
-    { id: 3, content: "API 연동", isCompleted: false },
-  ]);
+  const {
+    todayTodos: initialToday,
+    currentTodos: initialCurrent,
+    completedTodos: initialCompleted,
+  } = loadTodosFromStorage();
 
-  const [completedTodos, setCompletedTodos] = useState([]);
-  const [currentTodos, setCurrentTodos] = useState([]);
+  const [todayTodos, setTodayTodos] = useState(initialToday);
+  const [completedTodos, setCompletedTodos] = useState(initialCompleted);
+  const [currentTodos, setCurrentTodos] = useState(initialCurrent);
   const [activeId, setActiveId] = useState(null);
   const [activeList, setActiveList] = useState(null);
+
+  // 데이터 변경시 저장
+  useEffect(() => {
+    saveTodosToStorage(todayTodos, currentTodos, completedTodos);
+  }, [todayTodos, currentTodos, completedTodos]);
 
   const findTodoById = (id, list) => list.find((todo) => todo.id === id);
   const findListByTodoId = (id) => {
@@ -117,7 +124,12 @@ const PomodoroPage = () => {
       setSourceTodos((prev) => prev.filter((todo) => todo.id !== active.id));
       setTargetTodos((prev) => {
         const newTodos = [...prev];
-        newTodos.splice(overIndex, 0, activeTodo);
+        // 완료된 할 일 목록으로 이동할 때는 항상 완료 상태로 설정
+        const updatedTodo =
+          targetList === "completed"
+            ? { ...activeTodo, isCompleted: true }
+            : { ...activeTodo, isCompleted: false };
+        newTodos.splice(overIndex, 0, updatedTodo);
         return newTodos;
       });
     }
@@ -137,15 +149,20 @@ const PomodoroPage = () => {
       return;
     }
 
-    const todo = findTodoById(id, list === "today" ? todayTodos : currentTodos);
-
-    if (todo) {
-      if (list === "completed") {
-        // 완료된 할 일을 다시 미완료로
+    if (list === "completed") {
+      // 완료된 할 일을 다시 미완료로 - 오늘의 할 일로 이동
+      const todo = findTodoById(id, completedTodos);
+      if (todo) {
         setCompletedTodos((prev) => prev.filter((t) => t.id !== id));
         setTodayTodos((prev) => [...prev, { ...todo, isCompleted: false }]);
-      } else if (list === "today") {
-        // 오늘의 할 일을 완료 처리
+      }
+      return;
+    }
+
+    if (list === "today") {
+      // 오늘의 할 일을 완료 처리 - 완료된 할 일로 이동
+      const todo = findTodoById(id, todayTodos);
+      if (todo) {
         setTodayTodos((prev) => prev.filter((t) => t.id !== id));
         setCompletedTodos((prev) => [...prev, { ...todo, isCompleted: true }]);
       }

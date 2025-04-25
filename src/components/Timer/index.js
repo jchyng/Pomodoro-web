@@ -1,8 +1,12 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect } from "react";
 import styles from "./Timer.module.css";
 import PomodoroSettings from "../PomodoroSettings";
 import { FaPlay, FaPause, FaUndo, FaHistory } from "react-icons/fa";
 import TodoList from "../TodoList";
+import {
+  showNotification,
+  requestNotificationPermission,
+} from "../../utils/notification";
 
 const Timer = ({ currentTodos, onTodoToggle, onTodoDelete, onBreakEnd }) => {
   const [workTime, setWorkTime] = useState(0.05);
@@ -13,43 +17,23 @@ const Timer = ({ currentTodos, onTodoToggle, onTodoDelete, onBreakEnd }) => {
   const [isRunning, setIsRunning] = useState(false);
   const [isBreakTime, setIsBreakTime] = useState(false);
   const [isAuto, setIsAuto] = useState(false);
-  const [audio] = useState(new Audio("/Blop Sound.mp3"));
 
-  // 알림 권한 요청
   useEffect(() => {
-    if ("Notification" in window) {
-      Notification.requestPermission();
-    }
+    requestNotificationPermission();
   }, []);
-
-  const showNotification = useCallback(
-    (title, body) => {
-      audio.currentTime = 0;
-      audio.play().catch((error) => console.log("효과음 재생 실패:", error));
-
-      if ("Notification" in window && Notification.permission === "granted") {
-        new Notification(title, { body, icon: "/favicon.ico" });
-      }
-    },
-    [audio]
-  );
 
   useEffect(() => {
     let timer;
 
-    // 카운트다운 중
     if (isRunning && time > 0) {
       timer = setInterval(() => {
         setTime((prevTime) => prevTime - 1);
       }, 1000);
-    }
-    // 카운트다운 종료
-    else if (time === 0 && isRunning) {
+    } else if (time === 0 && isRunning) {
       if (!isAuto) {
         setIsRunning(false);
       }
 
-      // 휴식 시간 종료
       if (isBreakTime) {
         showNotification(
           "휴식 시간 종료!",
@@ -58,9 +42,7 @@ const Timer = ({ currentTodos, onTodoToggle, onTodoDelete, onBreakEnd }) => {
         setTime(workTime * 60);
         setIsBreakTime(false);
         onBreakEnd();
-      }
-      // 작업 시간 종료
-      else {
+      } else {
         showNotification(
           "작업 시간 종료!",
           "잠시 휴식을 취하고 다음 작업을 준비해보세요. 😊"
@@ -77,12 +59,9 @@ const Timer = ({ currentTodos, onTodoToggle, onTodoDelete, onBreakEnd }) => {
     time,
     breakTime,
     currentPomodoro,
-    targetPomodoroCount,
     isBreakTime,
     isAuto,
     onBreakEnd,
-    audio,
-    showNotification,
   ]);
 
   const formatTime = (seconds) => {
