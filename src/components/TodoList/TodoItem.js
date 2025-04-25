@@ -25,6 +25,8 @@ const TodoItem = ({ id, content, isCompleted, onToggle, onDelete }) => {
       ref={setNodeRef}
       style={style}
       className={`${styles.todoItem} ${isCompleted ? styles.completed : ""}`}
+      {...attributes}
+      {...listeners}
     >
       <label className={styles.checkbox}>
         <input
@@ -34,9 +36,7 @@ const TodoItem = ({ id, content, isCompleted, onToggle, onDelete }) => {
         />
         <span className={styles.checkmark}></span>
       </label>
-      <div className={styles.dragHandle} {...attributes} {...listeners}>
-        <span className={styles.content}>{content}</span>
-      </div>
+      <span className={styles.content}>{content}</span>
       <button className={styles.deleteButton} onClick={() => onDelete(id)}>
         <FaTrash />
       </button>

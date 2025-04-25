@@ -103,6 +103,11 @@
   transition: all 0.2s;
   position: relative;
   border: 1px solid var(--system-gray3);
+  cursor: grab;
+}
+
+.todoItem:active {
+  cursor: grabbing;
 }
 
 .todoItem:hover {
@@ -190,6 +195,8 @@
   word-break: break-word;
   line-height: 1.4;
   font-weight: 500;
+  flex: 1;
+  user-select: none;
 }
 
 .deleteButton {

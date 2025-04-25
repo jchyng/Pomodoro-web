@@ -43,36 +43,69 @@ const PomodoroPage = () => {
 
     const activeTodo = findTodoById(
       active.id,
-      activeList === "today" ? todayTodos : currentTodos
+      activeList === "today"
+        ? todayTodos
+        : activeList === "current"
+        ? currentTodos
+        : completedTodos
     );
+
     const overTodoInToday = findTodoById(over.id, todayTodos);
     const overTodoInCurrent = findTodoById(over.id, currentTodos);
+    const overTodoInCompleted = findTodoById(over.id, completedTodos);
+
     const overList = overTodoInToday
       ? "today"
       : overTodoInCurrent
       ? "current"
+      : overTodoInCompleted
+      ? "completed"
       : over.id;
 
     if (activeList === overList) {
       // 같은 리스트 내에서 이동
-      const todos = activeList === "today" ? todayTodos : currentTodos;
+      const todos =
+        activeList === "today"
+          ? todayTodos
+          : activeList === "current"
+          ? currentTodos
+          : completedTodos;
+      const setTodos =
+        activeList === "today"
+          ? setTodayTodos
+          : activeList === "current"
+          ? setCurrentTodos
+          : setCompletedTodos;
+
       const oldIndex = todos.findIndex((todo) => todo.id === active.id);
       const newIndex = todos.findIndex((todo) => todo.id === over.id);
 
       if (oldIndex !== newIndex) {
-        const newTodos = arrayMove(todos, oldIndex, newIndex);
-        if (activeList === "today") {
-          setTodayTodos(newTodos);
-        } else {
-          setCurrentTodos(newTodos);
-        }
+        setTodos(arrayMove(todos, oldIndex, newIndex));
       }
     } else {
       // 다른 리스트로 이동
       const targetList = overList;
-      const targetTodos = targetList === "today" ? todayTodos : currentTodos;
-      let overIndex;
+      const targetTodos =
+        targetList === "today"
+          ? todayTodos
+          : targetList === "current"
+          ? currentTodos
+          : completedTodos;
+      const setTargetTodos =
+        targetList === "today"
+          ? setTodayTodos
+          : targetList === "current"
+          ? setCurrentTodos
+          : setCompletedTodos;
+      const setSourceTodos =
+        activeList === "today"
+          ? setTodayTodos
+          : activeList === "current"
+          ? setCurrentTodos
+          : setCompletedTodos;
 
+      let overIndex;
       if (over.id === targetList) {
         // 빈 리스트로 이동
         overIndex = targetTodos.length;
@@ -81,21 +114,12 @@ const PomodoroPage = () => {
         overIndex = targetTodos.findIndex((todo) => todo.id === over.id);
       }
 
-      if (activeList === "today") {
-        setTodayTodos((prev) => prev.filter((todo) => todo.id !== active.id));
-        setCurrentTodos((prev) => {
-          const newTodos = [...prev];
-          newTodos.splice(overIndex, 0, activeTodo);
-          return newTodos;
-        });
-      } else {
-        setCurrentTodos((prev) => prev.filter((todo) => todo.id !== active.id));
-        setTodayTodos((prev) => {
-          const newTodos = [...prev];
-          newTodos.splice(overIndex, 0, activeTodo);
-          return newTodos;
-        });
-      }
+      setSourceTodos((prev) => prev.filter((todo) => todo.id !== active.id));
+      setTargetTodos((prev) => {
+        const newTodos = [...prev];
+        newTodos.splice(overIndex, 0, activeTodo);
+        return newTodos;
+      });
     }
 
     setActiveId(null);
@@ -103,18 +127,18 @@ const PomodoroPage = () => {
   };
 
   const handleTodoToggle = (list, id) => {
-    const setTodos = list === "today" ? setTodayTodos : setCurrentTodos;
     const todo = findTodoById(id, list === "today" ? todayTodos : currentTodos);
 
     if (todo) {
-      if (todo.isCompleted) {
-        // 완료 취소
-        setTodos((prev) =>
-          prev.map((t) => (t.id === id ? { ...t, isCompleted: false } : t))
-        );
+      if (list === "completed") {
+        // 완료된 할 일을 다시 미완료로
+        setCompletedTodos((prev) => prev.filter((t) => t.id !== id));
+        setTodayTodos((prev) => [...prev, { ...todo, isCompleted: false }]);
       } else {
-        // 완료 처리
-        setTodos((prev) => prev.filter((t) => t.id !== id));
+        // 할 일을 완료 처리
+        const setSourceTodos =
+          list === "today" ? setTodayTodos : setCurrentTodos;
+        setSourceTodos((prev) => prev.filter((t) => t.id !== id));
         setCompletedTodos((prev) => [...prev, { ...todo, isCompleted: true }]);
       }
     }
@@ -129,13 +153,25 @@ const PomodoroPage = () => {
   };
 
   const handleTodoDelete = (list, id) => {
-    const setTodos = list === "today" ? setTodayTodos : setCurrentTodos;
+    const setTodos =
+      list === "today"
+        ? setTodayTodos
+        : list === "current"
+        ? setCurrentTodos
+        : setCompletedTodos;
     setTodos((prev) => prev.filter((todo) => todo.id !== id));
   };
 
   const activeTodo =
     activeId &&
-    findTodoById(activeId, activeList === "today" ? todayTodos : currentTodos);
+    findTodoById(
+      activeId,
+      activeList === "today"
+        ? todayTodos
+        : activeList === "current"
+        ? currentTodos
+        : completedTodos
+    );
 
   return (
     <div className={styles.container}>
