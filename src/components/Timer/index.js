@@ -1,25 +1,38 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import styles from "./Timer.module.css";
 import PomodoroSettings from "../PomodoroSettings";
 import { FaPlay, FaPause, FaUndo, FaHistory } from "react-icons/fa";
 import TodoList from "../TodoList";
 
-const Timer = ({
-  currentTodos,
-  onTodoToggle,
-  onTodoAdd,
-  onTodoDelete,
-  onBreakEnd,
-}) => {
+const Timer = ({ currentTodos, onTodoToggle, onTodoDelete, onBreakEnd }) => {
   const [workTime, setWorkTime] = useState(0.05);
   const [breakTime, setBreakTime] = useState(0.05);
   const [time, setTime] = useState(workTime * 60);
   const [targetPomodoroCount, setTargetPomodoroCount] = useState(2);
   const [currentPomodoro, setCurrentPomodoro] = useState(0);
-
   const [isRunning, setIsRunning] = useState(false);
   const [isBreakTime, setIsBreakTime] = useState(false);
   const [isAuto, setIsAuto] = useState(false);
+  const [audio] = useState(new Audio("/Blop Sound.mp3"));
+
+  // 알림 권한 요청
+  useEffect(() => {
+    if ("Notification" in window) {
+      Notification.requestPermission();
+    }
+  }, []);
+
+  const showNotification = useCallback(
+    (title, body) => {
+      audio.currentTime = 0;
+      audio.play().catch((error) => console.log("효과음 재생 실패:", error));
+
+      if ("Notification" in window && Notification.permission === "granted") {
+        new Notification(title, { body, icon: "/favicon.ico" });
+      }
+    },
+    [audio]
+  );
 
   useEffect(() => {
     let timer;
@@ -38,12 +51,20 @@ const Timer = ({
 
       // 휴식 시간 종료
       if (isBreakTime) {
+        showNotification(
+          "휴식 시간 종료!",
+          "다시 작업을 시작할 시간이에요. 화이팅! 💪"
+        );
         setTime(workTime * 60);
         setIsBreakTime(false);
         onBreakEnd();
       }
       // 작업 시간 종료
       else {
+        showNotification(
+          "작업 시간 종료!",
+          "잠시 휴식을 취하고 다음 작업을 준비해보세요. 😊"
+        );
         setCurrentPomodoro((prev) => prev + 1);
         setTime(breakTime * 60);
         setIsBreakTime(true);
@@ -60,29 +81,10 @@ const Timer = ({
     isBreakTime,
     isAuto,
     onBreakEnd,
+    audio,
+    showNotification,
   ]);
 
-  const toggleTimer = () => {
-    setIsRunning(!isRunning);
-  };
-
-  const toggleAuto = () => {
-    setIsAuto(!isAuto);
-  };
-
-  const initTimer = () => {
-    setIsRunning(false);
-    setTime(isBreakTime ? breakTime * 60 : workTime * 60);
-  };
-
-  const resetTimer = () => {
-    setIsRunning(false);
-    setTime(workTime * 60);
-    setIsBreakTime(false);
-    setCurrentPomodoro(0);
-  };
-
-  // 시간 포맷팅 => MM:ss
   const formatTime = (seconds) => {
     const minutes = Math.floor(seconds / 60);
     const remainingSeconds = seconds % 60;
@@ -96,7 +98,7 @@ const Timer = ({
     const value = parseInt(e.target.value);
     if (!isNaN(value) && value > 0) {
       setWorkTime(value);
-      if (!isRunning) {
+      if (!isRunning && !isBreakTime) {
         setTime(value * 60);
       }
     }
@@ -107,7 +109,7 @@ const Timer = ({
     const value = parseInt(e.target.value);
     if (!isNaN(value) && value > 0) {
       setBreakTime(value);
-      if (isRunning) {
+      if (!isRunning && isBreakTime) {
         setTime(value * 60);
       }
     }
@@ -132,7 +134,7 @@ const Timer = ({
         onTargetPomodoroCountChange={handleTargetPomodoroCountChange}
         isRunning={isRunning}
         isAuto={isAuto}
-        onToggleAuto={toggleAuto}
+        onToggleAuto={() => setIsAuto(!isAuto)}
       />
 
       <div className={styles.timer}>{formatTime(time)}</div>
@@ -144,7 +146,7 @@ const Timer = ({
 
       <div className={styles.controls}>
         <button
-          onClick={toggleTimer}
+          onClick={() => setIsRunning(!isRunning)}
           className={styles.button}
           title={isRunning ? "일시정지" : "시작"}
         >
@@ -152,7 +154,10 @@ const Timer = ({
         </button>
 
         <button
-          onClick={initTimer}
+          onClick={() => {
+            setIsRunning(false);
+            setTime(isBreakTime ? breakTime * 60 : workTime * 60);
+          }}
           className={styles.button}
           title="현재 시간만 초기화"
         >
@@ -160,7 +165,12 @@ const Timer = ({
         </button>
 
         <button
-          onClick={resetTimer}
+          onClick={() => {
+            setIsRunning(false);
+            setTime(workTime * 60);
+            setIsBreakTime(false);
+            setCurrentPomodoro(0);
+          }}
           className={styles.button}
           title="뽀모도로 전체 초기화"
         >
