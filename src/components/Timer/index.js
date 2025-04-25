@@ -2,8 +2,9 @@ import React, { useState, useEffect } from "react";
 import styles from "./Timer.module.css";
 import PomodoroSettings from "../PomodoroSettings";
 import { FaPlay, FaPause, FaUndo, FaHistory } from "react-icons/fa";
+import TodoList from "../TodoList";
 
-const Timer = () => {
+const Timer = ({ currentTodos, onTodoToggle, onTodoAdd, onTodoDelete }) => {
   const [workTime, setWorkTime] = useState(0.05);
   const [breakTime, setBreakTime] = useState(0.05);
   const [time, setTime] = useState(workTime * 60);
@@ -157,6 +158,18 @@ const Timer = () => {
         >
           <FaHistory />
         </button>
+      </div>
+
+      <div className={styles.currentWork}>
+        <TodoList
+          id="current"
+          title="현재 작업"
+          todos={currentTodos}
+          onToggle={onTodoToggle}
+          onDelete={onTodoDelete}
+          emptyMessage="이번 뽀모도로에서는 어떤 작업을 하실건가요? 🤔"
+          hideInput={true}
+        />
       </div>
     </div>
   );

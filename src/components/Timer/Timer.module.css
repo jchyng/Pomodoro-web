@@ -119,3 +119,19 @@
 .button.active:hover {
   background-color: #0077ed;
 }
+
+.currentWork {
+  width: 100%;
+  margin-top: 2rem;
+  min-width: 400px;
+  display: flex;
+  justify-content: center;
+}
+
+.currentWork > div {
+  background: none;
+  box-shadow: none;
+  border: none;
+  padding: 0;
+  width: 100%;
+}

@@ -13,6 +13,7 @@ const PomodoroPage = () => {
     { id: 3, content: "API 연동", isCompleted: false },
   ]);
 
+  const [completedTodos, setCompletedTodos] = useState([]);
   const [currentTodos, setCurrentTodos] = useState([]);
   const [activeId, setActiveId] = useState(null);
   const [activeList, setActiveList] = useState(null);
@@ -21,6 +22,7 @@ const PomodoroPage = () => {
   const findListByTodoId = (id) => {
     if (findTodoById(id, todayTodos)) return "today";
     if (findTodoById(id, currentTodos)) return "current";
+    if (findTodoById(id, completedTodos)) return "completed";
     return null;
   };
 
@@ -102,11 +104,20 @@ const PomodoroPage = () => {
 
   const handleTodoToggle = (list, id) => {
     const setTodos = list === "today" ? setTodayTodos : setCurrentTodos;
-    setTodos((prev) =>
-      prev.map((todo) =>
-        todo.id === id ? { ...todo, isCompleted: !todo.isCompleted } : todo
-      )
-    );
+    const todo = findTodoById(id, list === "today" ? todayTodos : currentTodos);
+
+    if (todo) {
+      if (todo.isCompleted) {
+        // 완료 취소
+        setTodos((prev) =>
+          prev.map((t) => (t.id === id ? { ...t, isCompleted: false } : t))
+        );
+      } else {
+        // 완료 처리
+        setTodos((prev) => prev.filter((t) => t.id !== id));
+        setCompletedTodos((prev) => [...prev, { ...todo, isCompleted: true }]);
+      }
+    }
   };
 
   const handleTodoAdd = (list, content) => {
@@ -129,14 +140,18 @@ const PomodoroPage = () => {
   return (
     <div className={styles.container}>
       <div className={styles.content}>
-        <div className={styles.timerSection}>
-          <Timer />
-        </div>
         <DndContext
           onDragStart={handleDragStart}
           onDragEnd={handleDragEnd}
           collisionDetection={closestCorners}
         >
+          <div className={styles.timerSection}>
+            <Timer
+              currentTodos={currentTodos}
+              onTodoToggle={(id) => handleTodoToggle("current", id)}
+              onTodoDelete={(id) => handleTodoDelete("current", id)}
+            />
+          </div>
           <div className={styles.todoSection}>
             <TodoList
               id="today"
@@ -148,13 +163,13 @@ const PomodoroPage = () => {
               emptyMessage="야호! 할 일을 모두 끝냈어요 👏👏"
             />
             <TodoList
-              id="current"
-              title="현재 작업"
-              todos={currentTodos}
-              onToggle={(id) => handleTodoToggle("current", id)}
-              onAdd={(content) => handleTodoAdd("current", content)}
-              onDelete={(id) => handleTodoDelete("current", id)}
-              emptyMessage="이번 뽀모도로에서는 어떤 작업을 하실건가요? 🤔"
+              id="completed"
+              title="완료된 할 일"
+              todos={completedTodos}
+              onToggle={(id) => handleTodoToggle("completed", id)}
+              onDelete={(id) => handleTodoDelete("completed", id)}
+              emptyMessage="아직 완료된 할 일이 없어요 😅"
+              hideInput={true}
             />
           </div>
           <DragOverlay
@@ -179,6 +194,3 @@ const PomodoroPage = () => {
 };
 
 export default PomodoroPage;
-
-//TODO: 데스크탑 화면에서 현재 작업을 Timer 하단에 배치하고 오늘의 할 일을 타이머 우측에 배치
-//TODO: 모바일 화면에서는 현재 작업 하단에 오늘 할 일 배치

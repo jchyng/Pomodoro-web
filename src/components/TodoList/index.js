@@ -16,6 +16,7 @@ const TodoList = ({
   onAdd,
   onDelete,
   emptyMessage,
+  hideInput = false,
 }) => {
   const [newTodo, setNewTodo] = useState("");
   const { setNodeRef } = useDroppable({
@@ -33,18 +34,6 @@ const TodoList = ({
   return (
     <div className={styles.todoList}>
       <h3 className={styles.title}>{title}</h3>
-      <form className={styles.addForm} onSubmit={handleSubmit}>
-        <input
-          type="text"
-          value={newTodo}
-          onChange={(e) => setNewTodo(e.target.value)}
-          placeholder="새로운 할 일 추가"
-          className={styles.addInput}
-        />
-        <button type="submit" className={styles.addButton}>
-          <FaPlus />
-        </button>
-      </form>
       <div ref={setNodeRef} className={styles.list}>
         <SortableContext
           items={todos.map((todo) => todo.id)}
@@ -67,6 +56,20 @@ const TodoList = ({
           </div>
         )}
       </div>
+      {!hideInput && (
+        <form className={styles.addForm} onSubmit={handleSubmit}>
+          <input
+            type="text"
+            value={newTodo}
+            onChange={(e) => setNewTodo(e.target.value)}
+            placeholder="새로운 할 일 추가"
+            className={styles.addInput}
+          />
+          <button type="submit" className={styles.addButton}>
+            <FaPlus />
+          </button>
+        </form>
+      )}
     </div>
   );
 };
