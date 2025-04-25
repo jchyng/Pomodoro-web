@@ -159,8 +159,8 @@ const Timer = ({ currentTodos, onTodoToggle, onTodoDelete, onBreakEnd }) => {
 
       <div className={styles.currentWork}>
         <TodoList
-          id="current"
-          title="현재 작업"
+          id="now"
+          title="진행 중인 작업"
           todos={currentTodos}
           onToggle={onTodoToggle}
           onDelete={onTodoDelete}

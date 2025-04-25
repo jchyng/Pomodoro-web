@@ -62,7 +62,7 @@ const TodoList = ({
             type="text"
             value={newTodo}
             onChange={(e) => setNewTodo(e.target.value)}
-            placeholder="새로운 할 일 추가"
+            placeholder="새로운 작업 추가"
             className={styles.addInput}
           />
           <button type="submit" className={styles.addButton}>

@@ -1,6 +1,6 @@
 const STORAGE_KEYS = {
   TODAY_TODOS: "todayTodos",
-  CURRENT_TODOS: "currentTodos",
+  NOW_TODOS: "nowTodos",
   COMPLETED_TODOS: "completedTodos",
 };
 
@@ -10,7 +10,7 @@ export const loadTodosFromStorage = () => {
       todayTodos:
         JSON.parse(localStorage.getItem(STORAGE_KEYS.TODAY_TODOS)) || [],
       currentTodos:
-        JSON.parse(localStorage.getItem(STORAGE_KEYS.CURRENT_TODOS)) || [],
+        JSON.parse(localStorage.getItem(STORAGE_KEYS.NOW_TODOS)) || [],
       completedTodos:
         JSON.parse(localStorage.getItem(STORAGE_KEYS.COMPLETED_TODOS)) || [],
     };
@@ -20,17 +20,10 @@ export const loadTodosFromStorage = () => {
   }
 };
 
-export const saveTodosToStorage = (
-  todayTodos,
-  currentTodos,
-  completedTodos
-) => {
+export const saveTodosToStorage = (todayTodos, nowTodos, completedTodos) => {
   try {
     localStorage.setItem(STORAGE_KEYS.TODAY_TODOS, JSON.stringify(todayTodos));
-    localStorage.setItem(
-      STORAGE_KEYS.CURRENT_TODOS,
-      JSON.stringify(currentTodos)
-    );
+    localStorage.setItem(STORAGE_KEYS.NOW_TODOS, JSON.stringify(nowTodos));
     localStorage.setItem(
       STORAGE_KEYS.COMPLETED_TODOS,
       JSON.stringify(completedTodos)

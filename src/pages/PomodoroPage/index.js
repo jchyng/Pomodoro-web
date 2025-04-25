@@ -10,25 +10,25 @@ import { loadTodosFromStorage, saveTodosToStorage } from "../../utils/storage";
 const PomodoroPage = () => {
   const {
     todayTodos: initialToday,
-    currentTodos: initialCurrent,
+    currentTodos: initialNow,
     completedTodos: initialCompleted,
   } = loadTodosFromStorage();
 
   const [todayTodos, setTodayTodos] = useState(initialToday);
   const [completedTodos, setCompletedTodos] = useState(initialCompleted);
-  const [currentTodos, setCurrentTodos] = useState(initialCurrent);
+  const [nowTodos, setNowTodos] = useState(initialNow);
   const [activeId, setActiveId] = useState(null);
   const [activeList, setActiveList] = useState(null);
 
   // 데이터 변경시 저장
   useEffect(() => {
-    saveTodosToStorage(todayTodos, currentTodos, completedTodos);
-  }, [todayTodos, currentTodos, completedTodos]);
+    saveTodosToStorage(todayTodos, nowTodos, completedTodos);
+  }, [todayTodos, nowTodos, completedTodos]);
 
   const findTodoById = (id, list) => list.find((todo) => todo.id === id);
   const findListByTodoId = (id) => {
     if (findTodoById(id, todayTodos)) return "today";
-    if (findTodoById(id, currentTodos)) return "current";
+    if (findTodoById(id, nowTodos)) return "now";
     if (findTodoById(id, completedTodos)) return "completed";
     return null;
   };
@@ -52,19 +52,19 @@ const PomodoroPage = () => {
       active.id,
       activeList === "today"
         ? todayTodos
-        : activeList === "current"
-        ? currentTodos
+        : activeList === "now"
+        ? nowTodos
         : completedTodos
     );
 
     const overTodoInToday = findTodoById(over.id, todayTodos);
-    const overTodoInCurrent = findTodoById(over.id, currentTodos);
+    const overTodoInNow = findTodoById(over.id, nowTodos);
     const overTodoInCompleted = findTodoById(over.id, completedTodos);
 
     const overList = overTodoInToday
       ? "today"
-      : overTodoInCurrent
-      ? "current"
+      : overTodoInNow
+      ? "now"
       : overTodoInCompleted
       ? "completed"
       : over.id;
@@ -74,14 +74,14 @@ const PomodoroPage = () => {
       const todos =
         activeList === "today"
           ? todayTodos
-          : activeList === "current"
-          ? currentTodos
+          : activeList === "now"
+          ? nowTodos
           : completedTodos;
       const setTodos =
         activeList === "today"
           ? setTodayTodos
-          : activeList === "current"
-          ? setCurrentTodos
+          : activeList === "now"
+          ? setNowTodos
           : setCompletedTodos;
 
       const oldIndex = todos.findIndex((todo) => todo.id === active.id);
@@ -96,20 +96,20 @@ const PomodoroPage = () => {
       const targetTodos =
         targetList === "today"
           ? todayTodos
-          : targetList === "current"
-          ? currentTodos
+          : targetList === "now"
+          ? nowTodos
           : completedTodos;
       const setTargetTodos =
         targetList === "today"
           ? setTodayTodos
-          : targetList === "current"
-          ? setCurrentTodos
+          : targetList === "now"
+          ? setNowTodos
           : setCompletedTodos;
       const setSourceTodos =
         activeList === "today"
           ? setTodayTodos
-          : activeList === "current"
-          ? setCurrentTodos
+          : activeList === "now"
+          ? setNowTodos
           : setCompletedTodos;
 
       let overIndex;
@@ -124,7 +124,6 @@ const PomodoroPage = () => {
       setSourceTodos((prev) => prev.filter((todo) => todo.id !== active.id));
       setTargetTodos((prev) => {
         const newTodos = [...prev];
-        // 완료된 할 일 목록으로 이동할 때는 항상 완료 상태로 설정
         const updatedTodo =
           targetList === "completed"
             ? { ...activeTodo, isCompleted: true }
@@ -139,9 +138,9 @@ const PomodoroPage = () => {
   };
 
   const handleTodoToggle = (list, id) => {
-    if (list === "current") {
-      // 현재 작업 목록의 할 일은 체크만 하고 이동하지 않음
-      setCurrentTodos((prev) =>
+    if (list === "now") {
+      // 진행 중인 작업 목록의 작업은 체크만 하고 이동하지 않음
+      setNowTodos((prev) =>
         prev.map((todo) =>
           todo.id === id ? { ...todo, isCompleted: !todo.isCompleted } : todo
         )
@@ -150,7 +149,7 @@ const PomodoroPage = () => {
     }
 
     if (list === "completed") {
-      // 완료된 할 일을 다시 미완료로 - 오늘의 할 일로 이동
+      // 완료된 작업을 다시 미완료로 - 오늘 할 작업으로 이동
       const todo = findTodoById(id, completedTodos);
       if (todo) {
         setCompletedTodos((prev) => prev.filter((t) => t.id !== id));
@@ -160,7 +159,7 @@ const PomodoroPage = () => {
     }
 
     if (list === "today") {
-      // 오늘의 할 일을 완료 처리 - 완료된 할 일로 이동
+      // 오늘 할 작업을 완료 처리 - 완료된 작업으로 이동
       const todo = findTodoById(id, todayTodos);
       if (todo) {
         setTodayTodos((prev) => prev.filter((t) => t.id !== id));
@@ -170,7 +169,7 @@ const PomodoroPage = () => {
   };
 
   const handleTodoAdd = (list, content) => {
-    const setTodos = list === "today" ? setTodayTodos : setCurrentTodos;
+    const setTodos = list === "today" ? setTodayTodos : setNowTodos;
     setTodos((prev) => [
       ...prev,
       { id: Date.now(), content, isCompleted: false },
@@ -181,19 +180,19 @@ const PomodoroPage = () => {
     const setTodos =
       list === "today"
         ? setTodayTodos
-        : list === "current"
-        ? setCurrentTodos
+        : list === "now"
+        ? setNowTodos
         : setCompletedTodos;
     setTodos((prev) => prev.filter((todo) => todo.id !== id));
   };
 
   const handleBreakEnd = () => {
-    // 현재 작업 목록에서 완료된 항목들을 찾아서 완료된 할 일로 이동
-    const completedItems = currentTodos.filter((todo) => todo.isCompleted);
-    const remainingItems = currentTodos.filter((todo) => !todo.isCompleted);
+    // 진행 중인 작업 목록에서 완료된 항목들을 찾아서 완료된 작업으로 이동
+    const completedItems = nowTodos.filter((todo) => todo.isCompleted);
+    const remainingItems = nowTodos.filter((todo) => !todo.isCompleted);
 
     if (completedItems.length > 0) {
-      setCurrentTodos(remainingItems);
+      setNowTodos(remainingItems);
       setCompletedTodos((prev) => [...prev, ...completedItems]);
     }
   };
@@ -204,8 +203,8 @@ const PomodoroPage = () => {
       activeId,
       activeList === "today"
         ? todayTodos
-        : activeList === "current"
-        ? currentTodos
+        : activeList === "now"
+        ? nowTodos
         : completedTodos
     );
 
@@ -219,29 +218,29 @@ const PomodoroPage = () => {
         >
           <div className={styles.timerSection}>
             <Timer
-              currentTodos={currentTodos}
-              onTodoToggle={(id) => handleTodoToggle("current", id)}
-              onTodoDelete={(id) => handleTodoDelete("current", id)}
+              currentTodos={nowTodos}
+              onTodoToggle={(id) => handleTodoToggle("now", id)}
+              onTodoDelete={(id) => handleTodoDelete("now", id)}
               onBreakEnd={handleBreakEnd}
             />
           </div>
           <div className={styles.todoSection}>
             <TodoList
               id="today"
-              title="오늘의 할 일"
+              title="오늘 할 작업"
               todos={todayTodos}
               onToggle={(id) => handleTodoToggle("today", id)}
               onAdd={(content) => handleTodoAdd("today", content)}
               onDelete={(id) => handleTodoDelete("today", id)}
-              emptyMessage="야호! 할 일을 모두 끝냈어요 👏👏"
+              emptyMessage="야호! 모든 작업을 끝냈어요 👏👏"
             />
             <TodoList
               id="completed"
-              title="완료된 할 일"
+              title="완료된 작업"
               todos={completedTodos}
               onToggle={(id) => handleTodoToggle("completed", id)}
               onDelete={(id) => handleTodoDelete("completed", id)}
-              emptyMessage="아직 완료된 할 일이 없어요 😅"
+              emptyMessage="아직 완료된 작업이 없어요 😅"
               hideInput={true}
             />
           </div>
