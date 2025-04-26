@@ -7,16 +7,39 @@ import {
   showNotification,
   requestNotificationPermission,
 } from "../../utils/notification";
+import {
+  saveSettingsToStorage,
+  loadSettingsFromStorage,
+  saveCurrentPomodoroCount,
+  loadCurrentPomodoroCount,
+} from "../../utils/storage";
 
 const Timer = ({ currentTodos, onTodoToggle, onTodoDelete, onBreakEnd }) => {
-  const [workTime, setWorkTime] = useState(25);
-  const [breakTime, setBreakTime] = useState(5);
-  const [time, setTime] = useState(workTime * 60);
-  const [targetPomodoroCount, setTargetPomodoroCount] = useState(4);
-  const [currentPomodoro, setCurrentPomodoro] = useState(0);
+  // 초기 설정 불러오기
+  const savedSettings = loadSettingsFromStorage();
+
+  const [workTime, setWorkTime] = useState(savedSettings.workTime);
+  const [breakTime, setBreakTime] = useState(savedSettings.breakTime);
+  const [time, setTime] = useState(savedSettings.workTime * 60);
+  const [targetPomodoroCount, setTargetPomodoroCount] = useState(
+    savedSettings.targetPomodoroCount
+  );
+  const [currentPomodoro, setCurrentPomodoro] = useState(
+    loadCurrentPomodoroCount()
+  );
   const [isRunning, setIsRunning] = useState(false);
   const [isBreakTime, setIsBreakTime] = useState(false);
-  const [isAuto, setIsAuto] = useState(false);
+  const [isAuto, setIsAuto] = useState(savedSettings.isAuto);
+
+  // 설정이 변경될 때마다 저장
+  useEffect(() => {
+    saveSettingsToStorage({
+      workTime,
+      breakTime,
+      targetPomodoroCount,
+      isAuto,
+    });
+  }, [workTime, breakTime, targetPomodoroCount, isAuto]);
 
   useEffect(() => {
     requestNotificationPermission();
@@ -47,7 +70,9 @@ const Timer = ({ currentTodos, onTodoToggle, onTodoDelete, onBreakEnd }) => {
           "작업 시간 종료!",
           "잠시 휴식을 취하고 다음 작업을 준비해보세요. 😊"
         );
-        setCurrentPomodoro((prev) => prev + 1);
+        const newPomodoroCount = currentPomodoro + 1;
+        setCurrentPomodoro(newPomodoroCount);
+        saveCurrentPomodoroCount(newPomodoroCount);
         setTime(breakTime * 60);
         setIsBreakTime(true);
       }
@@ -102,6 +127,15 @@ const Timer = ({ currentTodos, onTodoToggle, onTodoDelete, onBreakEnd }) => {
     }
   };
 
+  // 전체 초기화 버튼 핸들러 수정
+  const handleFullReset = () => {
+    setIsRunning(false);
+    setTime(workTime * 60);
+    setIsBreakTime(false);
+    setCurrentPomodoro(0);
+    saveCurrentPomodoroCount(0);
+  };
+
   return (
     <div className={styles.timerContainer}>
       <PomodoroSettings
@@ -144,12 +178,7 @@ const Timer = ({ currentTodos, onTodoToggle, onTodoDelete, onBreakEnd }) => {
         </button>
 
         <button
-          onClick={() => {
-            setIsRunning(false);
-            setTime(workTime * 60);
-            setIsBreakTime(false);
-            setCurrentPomodoro(0);
-          }}
+          onClick={handleFullReset}
           className={styles.button}
           title="뽀모도로 전체 초기화"
         >
