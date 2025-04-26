@@ -13,6 +13,7 @@ import {
   saveCurrentPomodoroCount,
   loadCurrentPomodoroCount,
 } from "../../utils/storage";
+import { sendGAEvent } from "../../utils/analytics";
 
 const Timer = ({ currentTodos, onTodoToggle, onTodoDelete, onBreakEnd }) => {
   // 초기 설정 불러오기
@@ -65,6 +66,11 @@ const Timer = ({ currentTodos, onTodoToggle, onTodoDelete, onBreakEnd }) => {
         setTime(workTime * 60);
         setIsBreakTime(false);
         onBreakEnd();
+
+        // 휴식 시간 종료 이벤트 추적
+        sendGAEvent("break_completed", {
+          break_duration: breakTime,
+        });
       } else {
         showNotification(
           "작업 시간 종료!",
@@ -75,6 +81,12 @@ const Timer = ({ currentTodos, onTodoToggle, onTodoDelete, onBreakEnd }) => {
         saveCurrentPomodoroCount(newPomodoroCount);
         setTime(breakTime * 60);
         setIsBreakTime(true);
+
+        // 뽀모도로 완료 이벤트 추적
+        sendGAEvent("pomodoro_completed", {
+          pomodoro_count: newPomodoroCount,
+          work_duration: workTime,
+        });
       }
     }
     return () => clearInterval(timer);
@@ -136,18 +148,51 @@ const Timer = ({ currentTodos, onTodoToggle, onTodoDelete, onBreakEnd }) => {
     saveCurrentPomodoroCount(0);
   };
 
+  // 타이머 시작/일시정지 이벤트 추적
+  const handleTimerToggle = () => {
+    const newIsRunning = !isRunning;
+    setIsRunning(newIsRunning);
+
+    sendGAEvent("timer_" + (newIsRunning ? "start" : "pause"), {
+      is_break: isBreakTime,
+      remaining_time: time,
+    });
+  };
+
+  // 설정 변경 이벤트 추적
+  const handleSettingsChange = () => {
+    sendGAEvent("settings_changed", {
+      work_time: workTime,
+      break_time: breakTime,
+      target_count: targetPomodoroCount,
+      is_auto: isAuto,
+    });
+  };
+
   return (
     <div className={styles.timerContainer}>
       <PomodoroSettings
         workTime={workTime}
         breakTime={breakTime}
         targetPomodoroCount={targetPomodoroCount}
-        onWorkTimeChange={handleWorkTimeChange}
-        onBreakTimeChange={handleBreakTimeChange}
-        onTargetPomodoroCountChange={handleTargetPomodoroCountChange}
+        onWorkTimeChange={(e) => {
+          handleWorkTimeChange(e);
+          handleSettingsChange();
+        }}
+        onBreakTimeChange={(e) => {
+          handleBreakTimeChange(e);
+          handleSettingsChange();
+        }}
+        onTargetPomodoroCountChange={(e) => {
+          handleTargetPomodoroCountChange(e);
+          handleSettingsChange();
+        }}
+        onToggleAuto={() => {
+          setIsAuto(!isAuto);
+          handleSettingsChange();
+        }}
         isRunning={isRunning}
         isAuto={isAuto}
-        onToggleAuto={() => setIsAuto(!isAuto)}
       />
 
       <div className={styles.timer}>{formatTime(time)}</div>
@@ -159,7 +204,7 @@ const Timer = ({ currentTodos, onTodoToggle, onTodoDelete, onBreakEnd }) => {
 
       <div className={styles.controls}>
         <button
-          onClick={() => setIsRunning(!isRunning)}
+          onClick={handleTimerToggle}
           className={styles.button}
           title={isRunning ? "일시정지" : "시작"}
         >
