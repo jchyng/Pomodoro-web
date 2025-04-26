@@ -6,7 +6,7 @@ import Timer from "../../components/Timer";
 import TodoList from "../../components/TodoList";
 import TodoItem from "../../components/TodoList/TodoItem";
 import { loadTodosFromStorage, saveTodosToStorage } from "../../utils/storage";
-import AdComponent from "../../components/Ad/AdComponent";
+import AdComponent from "../../components/Ads/AdComponent";
 
 const PomodoroPage = () => {
   const {

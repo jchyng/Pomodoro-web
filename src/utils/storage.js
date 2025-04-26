@@ -78,11 +78,5 @@ export const loadTimerState = () => {
   };
 
   const savedState = localStorage.getItem("timerState");
-  if (!savedState) return defaultState;
-
-  const parsedState = JSON.parse(savedState);
-  return {
-    ...parsedState,
-    isRunning: false, // 재접속시 항상 타이머는 정지 상태로 시작
-  };
+  return savedState ? JSON.parse(savedState) : defaultState;
 };
