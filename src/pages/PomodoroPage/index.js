@@ -6,6 +6,7 @@ import Timer from "../../components/Timer";
 import TodoList from "../../components/TodoList";
 import TodoItem from "../../components/TodoList/TodoItem";
 import { loadTodosFromStorage, saveTodosToStorage } from "../../utils/storage";
+import AdComponent from "../../components/Ad/AdComponent";
 
 const PomodoroPage = () => {
   const {
@@ -211,6 +212,11 @@ const PomodoroPage = () => {
   return (
     <div className={styles.container}>
       <div className={styles.content}>
+        {/* 상단 광고 */}
+        <div className={styles.adContainer}>
+          <AdComponent />
+        </div>
+
         <DndContext
           onDragStart={handleDragStart}
           onDragEnd={handleDragEnd}
@@ -260,6 +266,11 @@ const PomodoroPage = () => {
             ) : null}
           </DragOverlay>
         </DndContext>
+
+        {/* 하단 광고 */}
+        <div className={styles.adContainer}>
+          <AdComponent />
+        </div>
       </div>
     </div>
   );
