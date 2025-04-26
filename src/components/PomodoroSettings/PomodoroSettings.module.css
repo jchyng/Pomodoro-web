@@ -113,3 +113,13 @@
   background-color: #e9e9eb;
   box-shadow: none;
 }
+
+.settingGroup input[type="number"]::-webkit-inner-spin-button,
+.settingGroup input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.settingGroup input[type="number"] {
+  -moz-appearance: textfield;
+}
