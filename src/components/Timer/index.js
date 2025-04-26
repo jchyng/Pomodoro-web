@@ -12,24 +12,26 @@ import {
   loadSettingsFromStorage,
   saveCurrentPomodoroCount,
   loadCurrentPomodoroCount,
+  saveTimerState,
+  loadTimerState,
 } from "../../utils/storage";
 import { sendGAEvent } from "../../utils/analytics";
 
 const Timer = ({ currentTodos, onTodoToggle, onTodoDelete, onBreakEnd }) => {
-  // 초기 설정 불러오기
   const savedSettings = loadSettingsFromStorage();
+  const savedTimerState = loadTimerState();
 
   const [workTime, setWorkTime] = useState(savedSettings.workTime);
   const [breakTime, setBreakTime] = useState(savedSettings.breakTime);
-  const [time, setTime] = useState(savedSettings.workTime * 60);
+  const [time, setTime] = useState(savedTimerState.time);
   const [targetPomodoroCount, setTargetPomodoroCount] = useState(
     savedSettings.targetPomodoroCount
   );
   const [currentPomodoro, setCurrentPomodoro] = useState(
     loadCurrentPomodoroCount()
   );
-  const [isRunning, setIsRunning] = useState(false);
-  const [isBreakTime, setIsBreakTime] = useState(false);
+  const [isRunning, setIsRunning] = useState(savedTimerState.isRunning);
+  const [isBreakTime, setIsBreakTime] = useState(savedTimerState.isBreakTime);
   const [isAuto, setIsAuto] = useState(savedSettings.isAuto);
 
   // 설정이 변경될 때마다 저장
@@ -51,7 +53,10 @@ const Timer = ({ currentTodos, onTodoToggle, onTodoDelete, onBreakEnd }) => {
 
     if (isRunning && time > 0) {
       timer = setInterval(() => {
-        setTime((prevTime) => prevTime - 1);
+        setTime((prevTime) => {
+          const newTime = prevTime - 1;
+          return newTime;
+        });
       }, 1000);
     } else if (time === 0 && isRunning) {
       if (!isAuto) {
@@ -101,6 +106,15 @@ const Timer = ({ currentTodos, onTodoToggle, onTodoDelete, onBreakEnd }) => {
     onBreakEnd,
   ]);
 
+  // 타이머 상태 저장
+  useEffect(() => {
+    saveTimerState({
+      time,
+      isBreakTime,
+      isRunning,
+    });
+  }, [time, isBreakTime, isRunning]);
+
   const formatTime = (seconds) => {
     const minutes = Math.floor(seconds / 60);
     const remainingSeconds = seconds % 60;
@@ -116,6 +130,12 @@ const Timer = ({ currentTodos, onTodoToggle, onTodoDelete, onBreakEnd }) => {
       setWorkTime(value);
       if (!isRunning && !isBreakTime) {
         setTime(value * 60);
+        // 타이머 상태 업데이트
+        saveTimerState({
+          time: value * 60,
+          isBreakTime,
+          isRunning,
+        });
       }
     }
   };
@@ -146,6 +166,12 @@ const Timer = ({ currentTodos, onTodoToggle, onTodoDelete, onBreakEnd }) => {
     setIsBreakTime(false);
     setCurrentPomodoro(0);
     saveCurrentPomodoroCount(0);
+    // 타이머 상태도 초기화
+    saveTimerState({
+      time: workTime * 60,
+      isBreakTime: false,
+      isRunning: false,
+    });
   };
 
   // 타이머 시작/일시정지 이벤트 추적

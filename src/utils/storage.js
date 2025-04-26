@@ -61,3 +61,28 @@ export const loadCurrentPomodoroCount = () => {
   const count = localStorage.getItem("currentPomodoroCount");
   return count ? parseInt(count) : 0;
 };
+
+// 타이머 상태 저장
+export const saveTimerState = (state) => {
+  localStorage.setItem("timerState", JSON.stringify(state));
+};
+
+// 타이머 상태 불러오기
+export const loadTimerState = () => {
+  const savedSettings = loadSettingsFromStorage();
+
+  const defaultState = {
+    time: savedSettings.workTime * 60, // 설정된 workTime 사용
+    isBreakTime: false,
+    isRunning: false,
+  };
+
+  const savedState = localStorage.getItem("timerState");
+  if (!savedState) return defaultState;
+
+  const parsedState = JSON.parse(savedState);
+  return {
+    ...parsedState,
+    isRunning: false, // 재접속시 항상 타이머는 정지 상태로 시작
+  };
+};
