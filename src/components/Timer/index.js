@@ -9,10 +9,10 @@ import {
 } from "../../utils/notification";
 
 const Timer = ({ currentTodos, onTodoToggle, onTodoDelete, onBreakEnd }) => {
-  const [workTime, setWorkTime] = useState(0.05);
-  const [breakTime, setBreakTime] = useState(0.05);
+  const [workTime, setWorkTime] = useState(25);
+  const [breakTime, setBreakTime] = useState(5);
   const [time, setTime] = useState(workTime * 60);
-  const [targetPomodoroCount, setTargetPomodoroCount] = useState(2);
+  const [targetPomodoroCount, setTargetPomodoroCount] = useState(4);
   const [currentPomodoro, setCurrentPomodoro] = useState(0);
   const [isRunning, setIsRunning] = useState(false);
   const [isBreakTime, setIsBreakTime] = useState(false);
