@@ -10,7 +10,7 @@ import { loadTodosFromStorage, saveTodosToStorage } from "../../utils/storage";
 const PomodoroPage = () => {
   const {
     todayTodos: initialToday,
-    currentTodos: initialNow,
+    nowTodos: initialNow,
     completedTodos: initialCompleted,
   } = loadTodosFromStorage();
 
@@ -20,7 +20,7 @@ const PomodoroPage = () => {
   const [activeId, setActiveId] = useState(null);
   const [activeList, setActiveList] = useState(null);
 
-  // 데이터 변경시 저장
+  // TodoList 데이터 변경 시 저장
   useEffect(() => {
     saveTodosToStorage(todayTodos, nowTodos, completedTodos);
   }, [todayTodos, nowTodos, completedTodos]);
@@ -186,8 +186,8 @@ const PomodoroPage = () => {
     setTodos((prev) => prev.filter((todo) => todo.id !== id));
   };
 
+  // 뽀모도로 휴식 시간 종료 시 진행 중인 작업 목록에서 완료된 항목들을 완료된 작업 목록으로 이동
   const handleBreakEnd = () => {
-    // 진행 중인 작업 목록에서 완료된 항목들을 찾아서 완료된 작업으로 이동
     const completedItems = nowTodos.filter((todo) => todo.isCompleted);
     const remainingItems = nowTodos.filter((todo) => !todo.isCompleted);
 
@@ -217,11 +217,15 @@ const PomodoroPage = () => {
           collisionDetection={closestCorners}
         >
           <div className={styles.timerSection}>
-            <Timer
-              currentTodos={nowTodos}
-              onTodoToggle={(id) => handleTodoToggle("now", id)}
-              onTodoDelete={(id) => handleTodoDelete("now", id)}
-              onBreakEnd={handleBreakEnd}
+            <Timer onBreakEnd={handleBreakEnd} />
+            <TodoList
+              id="now"
+              title="진행 중인 작업"
+              todos={nowTodos}
+              onToggle={(id) => handleTodoToggle("now", id)}
+              onDelete={(id) => handleTodoDelete("now", id)}
+              emptyMessage="이번 뽀모도로에서는 어떤 작업을 하실건가요? 🤔"
+              hideInput={true}
             />
           </div>
           <div className={styles.todoSection}>
@@ -244,6 +248,7 @@ const PomodoroPage = () => {
               hideInput={true}
             />
           </div>
+          {/* DragOverlay 컴포넌트가 List 외부에 있는 이유는 id를 통해서 Ref를 찾을 수 있기 떄문 */}
           <DragOverlay
             dropAnimation={{
               duration: 200,

@@ -17,10 +17,10 @@ const PomodoroInput = ({ label, value, onChange, disabled }) => (
 const PomodoroSettings = ({
   workTime,
   breakTime,
-  targetPomodoroCount,
+  targetPomodoro,
   onWorkTimeChange,
   onBreakTimeChange,
-  onTargetPomodoroCountChange,
+  onTargetPomodoroChange,
   isRunning,
   isAuto,
   onToggleAuto,
@@ -40,8 +40,8 @@ const PomodoroSettings = ({
     />
     <PomodoroInput
       label="목표 횟수"
-      value={targetPomodoroCount}
-      onChange={onTargetPomodoroCountChange}
+      value={targetPomodoro}
+      onChange={onTargetPomodoroChange}
       disabled={isRunning}
     />
     <div className={styles.settingGroup}>

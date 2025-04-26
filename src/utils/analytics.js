@@ -5,10 +5,10 @@ export const sendGAEvent = (eventName, eventParams = {}) => {
   }
 };
 
-// 페이지뷰 추적
+// 페이지뷰 추적 - process.env.환경변수명
 export const sendGAPageView = (page) => {
   if (window.gtag) {
-    window.gtag("config", "G-WJ3NJPZ9SG", {
+    window.gtag("config", process.env.REACT_APP_GA_MEASUREMENT_ID, {
       page_path: page,
     });
   }

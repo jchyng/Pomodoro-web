@@ -4,22 +4,23 @@ const STORAGE_KEYS = {
   COMPLETED_TODOS: "completedTodos",
 };
 
+// 로컬 스토리지에서 할 일 데이터 로드
 export const loadTodosFromStorage = () => {
   try {
     return {
       todayTodos:
         JSON.parse(localStorage.getItem(STORAGE_KEYS.TODAY_TODOS)) || [],
-      currentTodos:
-        JSON.parse(localStorage.getItem(STORAGE_KEYS.NOW_TODOS)) || [],
+      nowTodos: JSON.parse(localStorage.getItem(STORAGE_KEYS.NOW_TODOS)) || [],
       completedTodos:
         JSON.parse(localStorage.getItem(STORAGE_KEYS.COMPLETED_TODOS)) || [],
     };
   } catch (error) {
     console.error("로컬 스토리지 데이터 로드 실패:", error);
-    return { todayTodos: [], currentTodos: [], completedTodos: [] };
+    return { todayTodos: [], nowTodos: [], completedTodos: [] };
   }
 };
 
+// 로컬 스토리지에 할 일 데이터 저장
 export const saveTodosToStorage = (todayTodos, nowTodos, completedTodos) => {
   try {
     localStorage.setItem(STORAGE_KEYS.TODAY_TODOS, JSON.stringify(todayTodos));
@@ -43,7 +44,7 @@ export const loadSettingsFromStorage = () => {
   const defaultSettings = {
     workTime: 25,
     breakTime: 5,
-    targetPomodoroCount: 4,
+    targetPomodoro: 4,
     isAuto: false,
   };
 
@@ -52,13 +53,13 @@ export const loadSettingsFromStorage = () => {
 };
 
 // 현재 뽀모도로 횟수 저장
-export const saveCurrentPomodoroCount = (count) => {
-  localStorage.setItem("currentPomodoroCount", count.toString());
+export const saveNowPomodoro = (count) => {
+  localStorage.setItem("nowPomodoro", count.toString());
 };
 
 // 현재 뽀모도로 횟수 불러오기
-export const loadCurrentPomodoroCount = () => {
-  const count = localStorage.getItem("currentPomodoroCount");
+export const loadNowPomodoro = () => {
+  const count = localStorage.getItem("nowPomodoro");
   return count ? parseInt(count) : 0;
 };
 

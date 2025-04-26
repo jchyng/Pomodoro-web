@@ -1,11 +1,13 @@
 const notificationSound = new Audio("/Blop Sound.mp3");
 
+// 알림 권한 요청
 export const requestNotificationPermission = async () => {
   if ("Notification" in window) {
     await Notification.requestPermission();
   }
 };
 
+// 알림 표시
 export const showNotification = (title, body) => {
   notificationSound.currentTime = 0;
   notificationSound
