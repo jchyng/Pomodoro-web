@@ -188,6 +188,16 @@ const Timer = ({ onBreakEnd }) => {
     });
   }, [time, isBreakTime, isRunning]);
 
+  // 타이머 시간을 document.title에 반영
+  useEffect(() => {
+    // if (!isRunning) {
+    //   document.title = "Simple Pomodoro";
+    //   return;
+    // }
+    const title = isBreakTime ? "휴식 시간" : "작업 시간";
+    document.title = `${formatTime(time)} - ${title}`;
+  }, [time, isBreakTime, isRunning]);
+
   // 타이머 실행
   useEffect(() => {
     let timer;
