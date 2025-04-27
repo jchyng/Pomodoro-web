@@ -32,14 +32,13 @@
 1. 타이머 페이지 url: "/"
 2. 기록 페이지 url "/calendar"
 
-# 0순위
+# 1순위
 
+todo: 소스 분석 - ing
 todo: pomodoroPage - 리팩토링
 todo: todoList - 리팩토링
 
-# 1순위
-
-todo: 소스 분석
+todo: 브라우저 탭에 타이머 표시
 todo: 자동 실행 - 마지막 휴식 종료 후 멈춤 > 이후 다시 시작한 경우는 사용자가 정지할 때까지 반복
 todo: 마지막 작업 종료 메세지 변경
 todo: 쓰로틀링 -> web worker로 해결

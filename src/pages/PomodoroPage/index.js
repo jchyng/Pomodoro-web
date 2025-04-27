@@ -20,12 +20,28 @@ const PomodoroPage = () => {
   const [activeId, setActiveId] = useState(null);
   const [activeList, setActiveList] = useState(null);
 
+  const todoListMap = {
+    today: {
+      todos: todayTodos,
+      setTodos: setTodayTodos,
+    },
+    now: {
+      todos: nowTodos,
+      setTodos: setNowTodos,
+    },
+    completed: {
+      todos: completedTodos,
+      setTodos: setCompletedTodos,
+    },
+  };
+
   // TodoList 데이터 변경 시 저장
   useEffect(() => {
     saveTodosToStorage(todayTodos, nowTodos, completedTodos);
   }, [todayTodos, nowTodos, completedTodos]);
 
   const findTodoById = (id, list) => list.find((todo) => todo.id === id);
+
   const findListByTodoId = (id) => {
     if (findTodoById(id, todayTodos)) return "today";
     if (findTodoById(id, nowTodos)) return "now";
@@ -39,98 +55,80 @@ const PomodoroPage = () => {
     setActiveList(findListByTodoId(active.id));
   };
 
+  const getOverList = (over) => {
+    let overList;
+    for (const [listType, { todos }] of Object.entries(todoListMap)) {
+      if (findTodoById(over.id, todos)) {
+        overList = listType;
+        break;
+      }
+    }
+    return overList || over.id;
+  };
+
+  const handleSameListMove = (activeList, active, over) => {
+    const { todos, setTodos } = todoListMap[activeList];
+    const oldIndex = todos.findIndex((todo) => todo.id === active.id);
+    const newIndex = todos.findIndex((todo) => todo.id === over.id);
+
+    if (oldIndex !== newIndex) {
+      setTodos(arrayMove(todos, oldIndex, newIndex));
+    }
+  };
+
+  const handleDifferentListMove = (
+    activeList,
+    overList,
+    active,
+    over,
+    activeTodo
+  ) => {
+    const { todos: targetTodos, setTodos: setTargetTodos } =
+      todoListMap[overList];
+    const { setTodos: setSourceTodos } = todoListMap[activeList];
+
+    let overIndex;
+    if (over.id === overList) {
+      // 빈 리스트로 이동
+      overIndex = targetTodos.length;
+    } else {
+      // 특정 아이템 위로 이동
+      overIndex = targetTodos.findIndex((todo) => todo.id === over.id);
+    }
+
+    setSourceTodos((prev) => prev.filter((todo) => todo.id !== active.id));
+    setTargetTodos((prev) => {
+      const newTodos = [...prev];
+      const updatedTodo = {
+        ...activeTodo,
+        isCompleted: overList === "completed",
+      };
+      newTodos.splice(overIndex, 0, updatedTodo);
+      return newTodos;
+    });
+  };
+
   const handleDragEnd = (event) => {
     const { active, over } = event;
 
+    // 드래그가 취소되거나 유효하지 않은 위치에 놓인 경우
     if (!over) {
       setActiveId(null);
       setActiveList(null);
       return;
     }
 
-    const activeTodo = findTodoById(
-      active.id,
-      activeList === "today"
-        ? todayTodos
-        : activeList === "now"
-        ? nowTodos
-        : completedTodos
-    );
+    // 현재 드래그 중인 아이템
+    const activeTodo = findTodoById(active.id, todoListMap[activeList]?.todos);
+    const overList = getOverList(over);
 
-    const overTodoInToday = findTodoById(over.id, todayTodos);
-    const overTodoInNow = findTodoById(over.id, nowTodos);
-    const overTodoInCompleted = findTodoById(over.id, completedTodos);
-
-    const overList = overTodoInToday
-      ? "today"
-      : overTodoInNow
-      ? "now"
-      : overTodoInCompleted
-      ? "completed"
-      : over.id;
-
+    // 같은 리스트 내에서 순서 변경
     if (activeList === overList) {
-      // 같은 리스트 내에서 이동
-      const todos =
-        activeList === "today"
-          ? todayTodos
-          : activeList === "now"
-          ? nowTodos
-          : completedTodos;
-      const setTodos =
-        activeList === "today"
-          ? setTodayTodos
-          : activeList === "now"
-          ? setNowTodos
-          : setCompletedTodos;
-
-      const oldIndex = todos.findIndex((todo) => todo.id === active.id);
-      const newIndex = todos.findIndex((todo) => todo.id === over.id);
-
-      if (oldIndex !== newIndex) {
-        setTodos(arrayMove(todos, oldIndex, newIndex));
-      }
-    } else {
-      // 다른 리스트로 이동
-      const targetList = overList;
-      const targetTodos =
-        targetList === "today"
-          ? todayTodos
-          : targetList === "now"
-          ? nowTodos
-          : completedTodos;
-      const setTargetTodos =
-        targetList === "today"
-          ? setTodayTodos
-          : targetList === "now"
-          ? setNowTodos
-          : setCompletedTodos;
-      const setSourceTodos =
-        activeList === "today"
-          ? setTodayTodos
-          : activeList === "now"
-          ? setNowTodos
-          : setCompletedTodos;
-
-      let overIndex;
-      if (over.id === targetList) {
-        // 빈 리스트로 이동
-        overIndex = targetTodos.length;
-      } else {
-        // 특정 아이템 위로 이동
-        overIndex = targetTodos.findIndex((todo) => todo.id === over.id);
-      }
-
-      setSourceTodos((prev) => prev.filter((todo) => todo.id !== active.id));
-      setTargetTodos((prev) => {
-        const newTodos = [...prev];
-        const updatedTodo =
-          targetList === "completed"
-            ? { ...activeTodo, isCompleted: true }
-            : { ...activeTodo, isCompleted: false };
-        newTodos.splice(overIndex, 0, updatedTodo);
-        return newTodos;
-      });
+      handleSameListMove(activeList, active, over);
+    }
+    // 다른 리스트로 이동
+    else {
+      handleDifferentListMove(activeList, overList, active, over, activeTodo);
     }
 
     setActiveId(null);
