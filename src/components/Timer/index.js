@@ -256,7 +256,10 @@ const Timer = ({ onBreakEnd }) => {
         handleWorkComplete();
       }
 
-      if (isAuto) {
+      // 목표 횟수에 도달했을 때 자동 실행 정지
+      if (nowPomodoro === targetPomodoro) {
+        setIsAuto(false);
+      } else if (isAuto) {
         const nextTime = isBreakTime ? workTime * 60 : breakTime * 60;
         setTime(nextTime);
         setDisplayTime(nextTime);
@@ -272,6 +275,8 @@ const Timer = ({ onBreakEnd }) => {
     handleWorkComplete,
     workTime,
     breakTime,
+    nowPomodoro,
+    targetPomodoro,
   ]);
 
   return (

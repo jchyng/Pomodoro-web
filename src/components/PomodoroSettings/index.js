@@ -50,7 +50,7 @@ const PomodoroSettings = ({
         <input
           type="checkbox"
           checked={isAuto}
-          onChange={onToggleAuto}
+          onChange={(e) => onToggleAuto(e.target.checked)}
           disabled={isRunning}
         />
         <span className={styles.toggleSlider}></span>
