@@ -214,6 +214,16 @@ const PomodoroPage = () => {
     }
   };
 
+  const handleTodoClear = (list) => {
+    if (list === "today") {
+      setTodayTodos([]);
+    } else if (list === "now") {
+      setNowTodos([]);
+    } else if (list === "completed") {
+      setCompletedTodos([]);
+    }
+  };
+
   const activeTodo =
     activeId &&
     findTodoById(
@@ -242,6 +252,7 @@ const PomodoroPage = () => {
               onToggle={(id) => handleTodoToggle("now", id)}
               onDelete={(id) => handleTodoDelete("now", id)}
               onMove={(id) => handleTodoMove("now", id)}
+              onClear={() => handleTodoClear("now")}
               emptyMessage="이번 뽀모도로에서는 어떤 작업을 하실건가요? 🤔"
               hideInput={true}
               isInProgress={true}
@@ -256,6 +267,7 @@ const PomodoroPage = () => {
               onAdd={(content) => handleTodoAdd("today", content)}
               onDelete={(id) => handleTodoDelete("today", id)}
               onMove={(id) => handleTodoMove("today", id)}
+              onClear={() => handleTodoClear("today")}
               emptyMessage="야호! 모든 작업을 끝냈어요 👏👏"
               isInProgress={false}
             />
@@ -265,6 +277,7 @@ const PomodoroPage = () => {
               todos={completedTodos}
               onToggle={(id) => handleTodoToggle("completed", id)}
               onDelete={(id) => handleTodoDelete("completed", id)}
+              onClear={() => handleTodoClear("completed")}
               emptyMessage="아직 완료된 작업이 없어요 😅"
               hideInput={true}
               isInProgress={false}

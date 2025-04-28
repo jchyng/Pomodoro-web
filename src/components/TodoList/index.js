@@ -16,6 +16,7 @@ const TodoList = ({
   onAdd,
   onDelete,
   onMove,
+  onClear,
   emptyMessage,
   hideInput = false,
   isInProgress = false,
@@ -36,7 +37,18 @@ const TodoList = ({
 
   return (
     <div className={styles.todoList}>
-      <h3 className={styles.title}>{title}</h3>
+      <div className={styles.title}>
+        <h3>{title}</h3>
+        {todos.length > 0 && (
+          <button
+            className={styles.clearButton}
+            onClick={onClear}
+            title="모든 항목 삭제"
+          >
+            Clear
+          </button>
+        )}
+      </div>
       <div ref={setNodeRef} className={styles.list}>
         <SortableContext
           items={todos.map((todo) => todo.id)}
