@@ -12,6 +12,7 @@ const TodoItem = ({
   onDelete,
   onMove,
   isInProgress,
+  isCompletedList,
 }) => {
   const {
     attributes,
@@ -34,7 +35,7 @@ const TodoItem = ({
       style={style}
       className={`${styles.todoItem} ${isCompleted ? styles.completed : ""}`}
     >
-      {!isInProgress && (
+      {!isInProgress && !isCompletedList && (
         <button
           className={`${styles.moveButton} ${styles.moveLeft}`}
           onClick={(e) => {
@@ -53,7 +54,7 @@ const TodoItem = ({
       <span className={styles.content} {...attributes} {...listeners}>
         {content}
       </span>
-      {isInProgress && (
+      {isInProgress && !isCompletedList && (
         <button
           className={`${styles.moveButton} ${styles.moveRight}`}
           onClick={(e) => {

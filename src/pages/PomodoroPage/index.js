@@ -208,7 +208,8 @@ const PomodoroPage = () => {
       const todo = findTodoById(id, nowTodos);
       if (todo) {
         setNowTodos((prev) => prev.filter((t) => t.id !== id));
-        setTodayTodos((prev) => [...prev, todo]);
+        // 체크된 항목은 체크를 해제하고 이동
+        setTodayTodos((prev) => [...prev, { ...todo, isCompleted: false }]);
       }
     }
   };
@@ -267,6 +268,7 @@ const PomodoroPage = () => {
               emptyMessage="아직 완료된 작업이 없어요 😅"
               hideInput={true}
               isInProgress={false}
+              isCompletedList={true}
             />
           </div>
           {/* DragOverlay 컴포넌트가 List 외부에 있는 이유는 id를 통해서 Ref를 찾을 수 있기 떄문 */}
