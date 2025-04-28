@@ -194,6 +194,25 @@ const Timer = ({ onBreakEnd }) => {
     });
   }, [time, isBreakTime, isRunning]);
 
+  // 타이틀 업데이트
+  const updateTitle = (remainingTime) => {
+    const title = isBreakTime ? "휴식 시간" : "작업 시간";
+    document.title = `${formatTime(remainingTime)} - ${title}`;
+  };
+
+  // 타이머 상태 업데이트
+  const updateTimerState = (remaining) => {
+    setTime(remaining);
+    setDisplayTime(remaining);
+    updateTitle(remaining);
+  };
+
+  // 타이머 종료 처리
+  const handleTimerComplete = () => {
+    updateTimerState(0);
+    setIsRunning(false);
+  };
+
   // 타이머 실행
   useEffect(() => {
     let timerInterval;
@@ -206,30 +225,19 @@ const Timer = ({ onBreakEnd }) => {
       const remaining = Math.max(0, expectedTime - elapsed);
 
       if (isRunning && remaining > 0) {
-        setTime(remaining);
-        setDisplayTime(remaining);
-        const title = isBreakTime ? "휴식 시간" : "작업 시간";
-        document.title = `${formatTime(remaining)} - ${title}`;
+        updateTimerState(remaining);
       } else if (isRunning && remaining <= 0) {
-        setTime(0);
-        setDisplayTime(0);
-        setIsRunning(false);
-        const title = isBreakTime ? "휴식 시간" : "작업 시간";
-        document.title = `${formatTime(0)} - ${title}`;
+        handleTimerComplete();
       }
     };
 
     if (isRunning && time > 0) {
       startTime = Date.now();
       expectedTime = time;
-      setDisplayTime(time);
-      const title = isBreakTime ? "휴식 시간" : "작업 시간";
-      document.title = `${formatTime(time)} - ${title}`;
+      updateTimerState(time);
       timerInterval = setInterval(updateTimer, 100);
     } else {
-      setDisplayTime(time);
-      const title = isBreakTime ? "휴식 시간" : "작업 시간";
-      document.title = `${formatTime(time)} - ${title}`;
+      updateTimerState(time);
     }
 
     return () => {
@@ -239,19 +247,16 @@ const Timer = ({ onBreakEnd }) => {
     };
   }, [isRunning, time, isBreakTime]);
 
-  // 타이머 종료 처리
+  // 타이머 종료 후 처리
   useEffect(() => {
     if (!isRunning && time <= 0) {
-      // 현재 상태에 따라 다음 단계 처리
       if (isBreakTime) {
         handleBreakComplete();
       } else {
         handleWorkComplete();
       }
 
-      // 자동 실행 처리
       if (isAuto) {
-        // 다음 타이머 시작을 위한 준비
         const nextTime = isBreakTime ? workTime * 60 : breakTime * 60;
         setTime(nextTime);
         setDisplayTime(nextTime);
