@@ -195,6 +195,24 @@ const PomodoroPage = () => {
     }
   };
 
+  const handleTodoMove = (list, id) => {
+    if (list === "today") {
+      // 오늘 할 작업에서 진행 중인 작업으로 이동
+      const todo = findTodoById(id, todayTodos);
+      if (todo) {
+        setTodayTodos((prev) => prev.filter((t) => t.id !== id));
+        setNowTodos((prev) => [...prev, todo]);
+      }
+    } else if (list === "now") {
+      // 진행 중인 작업에서 오늘 할 작업으로 이동
+      const todo = findTodoById(id, nowTodos);
+      if (todo) {
+        setNowTodos((prev) => prev.filter((t) => t.id !== id));
+        setTodayTodos((prev) => [...prev, todo]);
+      }
+    }
+  };
+
   const activeTodo =
     activeId &&
     findTodoById(
@@ -222,8 +240,10 @@ const PomodoroPage = () => {
               todos={nowTodos}
               onToggle={(id) => handleTodoToggle("now", id)}
               onDelete={(id) => handleTodoDelete("now", id)}
+              onMove={(id) => handleTodoMove("now", id)}
               emptyMessage="이번 뽀모도로에서는 어떤 작업을 하실건가요? 🤔"
               hideInput={true}
+              isInProgress={true}
             />
           </div>
           <div className={styles.todoSection}>
@@ -234,7 +254,9 @@ const PomodoroPage = () => {
               onToggle={(id) => handleTodoToggle("today", id)}
               onAdd={(content) => handleTodoAdd("today", content)}
               onDelete={(id) => handleTodoDelete("today", id)}
+              onMove={(id) => handleTodoMove("today", id)}
               emptyMessage="야호! 모든 작업을 끝냈어요 👏👏"
+              isInProgress={false}
             />
             <TodoList
               id="completed"
@@ -244,6 +266,7 @@ const PomodoroPage = () => {
               onDelete={(id) => handleTodoDelete("completed", id)}
               emptyMessage="아직 완료된 작업이 없어요 😅"
               hideInput={true}
+              isInProgress={false}
             />
           </div>
           {/* DragOverlay 컴포넌트가 List 외부에 있는 이유는 id를 통해서 Ref를 찾을 수 있기 떄문 */}

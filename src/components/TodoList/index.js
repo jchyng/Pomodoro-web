@@ -15,8 +15,10 @@ const TodoList = ({
   onToggle,
   onAdd,
   onDelete,
+  onMove,
   emptyMessage,
   hideInput = false,
+  isInProgress = false,
 }) => {
   const [newTodo, setNewTodo] = useState("");
   const { setNodeRef } = useDroppable({
@@ -47,6 +49,8 @@ const TodoList = ({
               isCompleted={todo.isCompleted}
               onToggle={() => onToggle(todo.id)}
               onDelete={() => onDelete(todo.id)}
+              onMove={onMove}
+              isInProgress={isInProgress}
             />
           ))}
         </SortableContext>

@@ -7,6 +7,7 @@
   border-radius: var(--radius-lg);
   padding: 1.5rem;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
 }
 
 .title {
@@ -100,29 +101,134 @@
   padding: 0.5rem 1rem;
   background-color: var(--system-gray2);
   border-radius: var(--radius-lg);
-  transition: all 0.2s;
   position: relative;
   border: 1px solid var(--system-gray3);
   cursor: grab;
+  width: 100%;
+  margin: 0.5rem 0;
+  box-sizing: border-box;
+  transition: width 0.2s ease, margin 0.2s ease;
 }
 
+.moveButton {
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: none;
+  border-radius: var(--radius-lg);
+  background-color: transparent;
+  color: var(--system-gray);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  flex-shrink: 0;
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 1;
+  transition: opacity 0.2s ease, background-color 0.2s ease, transform 0.2s ease;
+}
+
+.moveLeft {
+  left: -40px;
+}
+
+.moveRight {
+  right: -40px;
+}
+
+/* 왼쪽 화살표가 있을 때 */
+.todoItem:has(.moveLeft):hover {
+  width: calc(100% - 40px);
+  margin-left: 40px;
+  margin-right: 0;
+}
+
+.todoItem:has(.moveLeft):hover .moveLeft {
+  opacity: 1;
+}
+
+/* 오른쪽 화살표가 있을 때 */
+.todoItem:has(.moveRight):hover {
+  width: calc(100% - 40px);
+  margin-right: 40px;
+  margin-left: 0;
+}
+
+.todoItem:has(.moveRight):hover .moveRight {
+  opacity: 1;
+}
+
+/* 버튼 hover 효과 */
+.moveButton:hover {
+  background-color: var(--system-blue);
+  color: var(--system-white);
+  transform: translateY(-50%) scale(1.1);
+}
+
+/* 드래그 중일 때는 효과 비활성화 */
 .todoItem:active {
-  cursor: grabbing;
+  transition: none;
+  width: 100%;
+  margin: 0.5rem 0;
 }
 
-.todoItem:hover {
-  background-color: var(--system-gray3);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+.todoItem:active .moveButton {
+  opacity: 0;
+  transition: none;
+}
+
+/* 버튼 영역 확장 */
+.moveButton::before {
+  content: "";
+  position: absolute;
+  top: -10px;
+  left: -10px;
+  right: -10px;
+  bottom: -10px;
+  z-index: -1;
+}
+
+/* hover 상태 유지를 위한 추가 영역 */
+.todoItem::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -40px;
+  right: -40px;
+  bottom: 0;
+  z-index: -1;
 }
 
 .dragHandle {
-  flex: 1;
+  position: relative;
+  width: 100%;
+  height: 100%;
   cursor: grab;
 }
 
-.dragHandle:active {
-  cursor: grabbing;
+/* 왼쪽 화살표가 있을 때 */
+.dragHandle:hover ~ .moveLeft {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.dragHandle:hover:has(~ .moveLeft) + .todoItem {
+  width: calc(100% - 40px);
+  margin-left: 40px;
+}
+
+/* 오른쪽 화살표가 있을 때 */
+.dragHandle:hover ~ .moveRight {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.dragHandle:hover:has(~ .moveRight) + .todoItem {
+  width: calc(100% - 40px);
+  margin-right: 40px;
 }
 
 .todoItem.completed {
@@ -210,7 +316,6 @@
   background-color: transparent;
   color: var(--system-gray);
   cursor: pointer;
-  transition: all 0.2s;
   display: flex;
   align-items: center;
   justify-content: center;
