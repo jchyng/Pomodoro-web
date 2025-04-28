@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import styles from "./Timer.module.css";
 import PomodoroSettings from "../PomodoroSettings";
 import { FaPlay, FaPause, FaUndo, FaHistory } from "react-icons/fa";
@@ -28,11 +28,13 @@ const Timer = ({ onBreakEnd }) => {
   const [isRunning, setIsRunning] = useState(savedTimerState.isRunning);
   const [isBreakTime, setIsBreakTime] = useState(savedTimerState.isBreakTime);
   const [isAuto, setIsAuto] = useState(savedSettings.isAuto);
+  const lastUpdateTimeRef = useRef(Date.now());
+  const [displayTime, setDisplayTime] = useState(time);
 
   // 시간 포맷팅
   const formatTime = (seconds) => {
     const minutes = Math.floor(seconds / 60);
-    const remainingSeconds = seconds % 60;
+    const remainingSeconds = Math.floor(seconds % 60);
     return `${minutes.toString().padStart(2, "0")}:${remainingSeconds
       .toString()
       .padStart(2, "0")}`;
@@ -81,11 +83,8 @@ const Timer = ({ onBreakEnd }) => {
     if (!isNaN(value) && value > 0) {
       setWorkTime(value);
       if (!isRunning && !isBreakTime) {
-        saveTimerState({
-          time: value * 60,
-          isBreakTime,
-          isRunning,
-        });
+        setTime(value * 60);
+        setDisplayTime(value * 60);
       }
       // 작업 시간 변경 이벤트만 전송
       sendGAEvent("settings_changed", {
@@ -101,6 +100,7 @@ const Timer = ({ onBreakEnd }) => {
       setBreakTime(value);
       if (!isRunning && isBreakTime) {
         setTime(value * 60);
+        setDisplayTime(value * 60);
       }
       // 휴식 시간 변경 이벤트만 전송
       sendGAEvent("settings_changed", {
@@ -151,6 +151,12 @@ const Timer = ({ onBreakEnd }) => {
     const newIsRunning = !isRunning;
     setIsRunning(newIsRunning);
 
+    if (newIsRunning) {
+      // 타이머 시작 시 정확한 시간 설정
+      lastUpdateTimeRef.current = Date.now();
+      setDisplayTime(time);
+    }
+
     sendGAEvent("timer_" + (newIsRunning ? "start" : "pause"), {
       is_break: isBreakTime,
       remaining_time: time,
@@ -188,51 +194,79 @@ const Timer = ({ onBreakEnd }) => {
     });
   }, [time, isBreakTime, isRunning]);
 
-  // 타이머 시간을 document.title에 반영
-  useEffect(() => {
-    // if (!isRunning) {
-    //   document.title = "Simple Pomodoro";
-    //   return;
-    // }
-    const title = isBreakTime ? "휴식 시간" : "작업 시간";
-    document.title = `${formatTime(time)} - ${title}`;
-  }, [time, isBreakTime, isRunning]);
-
   // 타이머 실행
   useEffect(() => {
-    let timer;
+    let timerInterval;
+    let startTime = Date.now();
+    let expectedTime = time;
 
-    // 카운트다운
+    const updateTimer = () => {
+      const now = Date.now();
+      const elapsed = (now - startTime) / 1000;
+      const remaining = Math.max(0, expectedTime - elapsed);
+
+      if (isRunning && remaining > 0) {
+        setTime(remaining);
+        setDisplayTime(remaining);
+        const title = isBreakTime ? "휴식 시간" : "작업 시간";
+        document.title = `${formatTime(remaining)} - ${title}`;
+      } else if (isRunning && remaining <= 0) {
+        setTime(0);
+        setDisplayTime(0);
+        setIsRunning(false);
+        const title = isBreakTime ? "휴식 시간" : "작업 시간";
+        document.title = `${formatTime(0)} - ${title}`;
+      }
+    };
+
     if (isRunning && time > 0) {
-      timer = setInterval(() => {
-        setTime((prevTime) => prevTime - 1);
-      }, 1000);
-      return () => clearInterval(timer);
+      startTime = Date.now();
+      expectedTime = time;
+      setDisplayTime(time);
+      const title = isBreakTime ? "휴식 시간" : "작업 시간";
+      document.title = `${formatTime(time)} - ${title}`;
+      timerInterval = setInterval(updateTimer, 100);
+    } else {
+      setDisplayTime(time);
+      const title = isBreakTime ? "휴식 시간" : "작업 시간";
+      document.title = `${formatTime(time)} - ${title}`;
     }
 
-    // 타이머 종료
-    if (isRunning && time === 0) {
-      if (!isAuto) {
-        setIsRunning(false);
+    return () => {
+      if (timerInterval) {
+        clearInterval(timerInterval);
       }
+    };
+  }, [isRunning, time, isBreakTime]);
 
+  // 타이머 종료 처리
+  useEffect(() => {
+    if (!isRunning && time <= 0) {
+      // 현재 상태에 따라 다음 단계 처리
       if (isBreakTime) {
         handleBreakComplete();
       } else {
         handleWorkComplete();
       }
+
+      // 자동 실행 처리
+      if (isAuto) {
+        // 다음 타이머 시작을 위한 준비
+        const nextTime = isBreakTime ? workTime * 60 : breakTime * 60;
+        setTime(nextTime);
+        setDisplayTime(nextTime);
+        setIsRunning(true);
+      }
     }
   }, [
     isRunning,
     time,
-    workTime,
-    breakTime,
-    nowPomodoro,
     isBreakTime,
     isAuto,
-    onBreakEnd,
     handleBreakComplete,
     handleWorkComplete,
+    workTime,
+    breakTime,
   ]);
 
   return (
@@ -248,7 +282,7 @@ const Timer = ({ onBreakEnd }) => {
         isRunning={isRunning}
         isAuto={isAuto}
       />
-      <div className={styles.timer}>{formatTime(time)}</div>
+      <div className={styles.timer}>{formatTime(displayTime)}</div>
       <div className={styles.status}>
         {isBreakTime ? "휴식 시간" : "작업 시간"} ({nowPomodoro}/
         {targetPomodoro})
