@@ -280,7 +280,11 @@ const Timer = ({ onBreakEnd }) => {
   ]);
 
   return (
-    <div className={styles.timerContainer}>
+    <div
+      className={`${styles.timerContainer} ${
+        isRunning ? (isBreakTime ? styles.break : styles.work) : styles.paused
+      }`}
+    >
       <PomodoroSettings
         workTime={workTime}
         breakTime={breakTime}
@@ -292,8 +296,18 @@ const Timer = ({ onBreakEnd }) => {
         isRunning={isRunning}
         isAuto={isAuto}
       />
-      <div className={styles.timer}>{formatTime(displayTime)}</div>
-      <div className={styles.status}>
+      <div
+        className={`${styles.timer} ${
+          isRunning ? (isBreakTime ? styles.break : styles.work) : styles.paused
+        }`}
+      >
+        {formatTime(displayTime)}
+      </div>
+      <div
+        className={`${styles.status} ${
+          isRunning ? (isBreakTime ? styles.break : styles.work) : styles.paused
+        }`}
+      >
         {isBreakTime ? "휴식 시간" : "작업 시간"} ({nowPomodoro}/
         {targetPomodoro})
       </div>
@@ -312,7 +326,6 @@ const Timer = ({ onBreakEnd }) => {
         >
           <FaUndo />
         </button>
-
         <button
           onClick={handleFullReset}
           className={styles.button}

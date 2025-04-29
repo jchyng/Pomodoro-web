@@ -288,13 +288,13 @@
   content: "";
   position: absolute;
   display: none;
-  left: 8px;
-  top: 4px;
+  left: 50%;
+  top: 44%;
   width: 6px;
   height: 12px;
   border: solid var(--system-white);
   border-width: 0 2px 2px 0;
-  transform: rotate(45deg);
+  transform: translate(-50%, -50%) rotate(45deg);
 }
 
 .checkbox input:checked + .checkmark:after {
