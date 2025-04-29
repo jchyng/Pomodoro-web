@@ -73,10 +73,45 @@
   color: var(--system-gray);
 }
 
+.timerWrapper {
+  position: relative;
+  width: 300px;
+  height: 300px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.progressRing {
+  position: absolute;
+  transform: rotate(-90deg);
+}
+
+.progressRingCircleBackground {
+  color: rgba(255, 255, 255, 0.1);
+}
+
+.progressRingCircle {
+  transition: stroke-dashoffset 0.1s linear;
+}
+
+.progressRingCircle.work {
+  color: #0071e3;
+}
+
+.progressRingCircle.break {
+  color: #34c759;
+}
+
+.progressRingCircle.paused {
+  color: #8e8e93;
+}
+
 .timer {
+  position: relative;
+  z-index: 1;
   font-size: 5rem;
   font-weight: 600;
-  margin-bottom: 1rem;
   letter-spacing: -0.02em;
   text-align: center;
   transition: color 0.3s ease;

@@ -279,6 +279,52 @@ const Timer = ({ onBreakEnd }) => {
     targetPomodoro,
   ]);
 
+  // 프로그레스 계산 함수 수정
+  const calculateProgress = () => {
+    const totalTime = isBreakTime ? breakTime * 60 : workTime * 60;
+    return (time / totalTime) * 100;
+  };
+
+  // SVG 원형 프로그레스 바 컴포넌트
+  const CircularProgress = () => {
+    const progress = calculateProgress();
+    const radius = 140;
+    const circumference = 2 * Math.PI * radius;
+    const strokeDashoffset = circumference - (progress / 100) * circumference;
+
+    return (
+      <svg className={styles.progressRing} width="350" height="350">
+        <circle
+          className={styles.progressRingCircleBackground}
+          strokeWidth="12"
+          stroke="currentColor"
+          fill="transparent"
+          r={radius}
+          cx="175"
+          cy="175"
+        />
+        <circle
+          className={`${styles.progressRingCircle} ${
+            isRunning
+              ? isBreakTime
+                ? styles.break
+                : styles.work
+              : styles.paused
+          }`}
+          strokeWidth="12"
+          strokeDasharray={circumference}
+          strokeDashoffset={strokeDashoffset}
+          strokeLinecap="round"
+          stroke="currentColor"
+          fill="transparent"
+          r={radius}
+          cx="175"
+          cy="175"
+        />
+      </svg>
+    );
+  };
+
   return (
     <div
       className={`${styles.timerContainer} ${
@@ -296,12 +342,19 @@ const Timer = ({ onBreakEnd }) => {
         isRunning={isRunning}
         isAuto={isAuto}
       />
-      <div
-        className={`${styles.timer} ${
-          isRunning ? (isBreakTime ? styles.break : styles.work) : styles.paused
-        }`}
-      >
-        {formatTime(displayTime)}
+      <div className={styles.timerWrapper}>
+        <CircularProgress />
+        <div
+          className={`${styles.timer} ${
+            isRunning
+              ? isBreakTime
+                ? styles.break
+                : styles.work
+              : styles.paused
+          }`}
+        >
+          {formatTime(displayTime)}
+        </div>
       </div>
       <div
         className={`${styles.status} ${
