@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { DndContext, DragOverlay, closestCorners } from "@dnd-kit/core";
 import { arrayMove } from "@dnd-kit/sortable";
 import styles from "./PomodoroPage.module.css";
@@ -20,27 +20,33 @@ const PomodoroPage = () => {
   const [activeId, setActiveId] = useState(null);
   const [activeList, setActiveList] = useState(null);
 
-  const todoListMap = {
-    today: {
-      todos: todayTodos,
-      setTodos: setTodayTodos,
-    },
-    now: {
-      todos: nowTodos,
-      setTodos: setNowTodos,
-    },
-    completed: {
-      todos: completedTodos,
-      setTodos: setCompletedTodos,
-    },
-  };
+  const todoListMap = useMemo(
+    () => ({
+      today: {
+        todos: todayTodos,
+        setTodos: setTodayTodos,
+      },
+      now: {
+        todos: nowTodos,
+        setTodos: setNowTodos,
+      },
+      completed: {
+        todos: completedTodos,
+        setTodos: setCompletedTodos,
+      },
+    }),
+    [todayTodos, nowTodos, completedTodos]
+  );
+
+  const findTodoById = useCallback(
+    (id, list) => list.find((todo) => todo.id === id),
+    []
+  );
 
   // TodoList 데이터 변경 시 저장
   useEffect(() => {
     saveTodosToStorage(todayTodos, nowTodos, completedTodos);
   }, [todayTodos, nowTodos, completedTodos]);
-
-  const findTodoById = (id, list) => list.find((todo) => todo.id === id);
 
   const findListByTodoId = (id) => {
     if (findTodoById(id, todayTodos)) return "today";

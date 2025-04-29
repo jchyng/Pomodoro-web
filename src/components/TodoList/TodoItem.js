@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useCallback } from "react";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { FaTrash, FaArrowRight, FaArrowLeft } from "react-icons/fa";
@@ -29,6 +29,24 @@ const TodoItem = ({
     opacity: isDragging ? 0.4 : 1,
   };
 
+  const handleMove = useCallback(
+    (e) => {
+      e.stopPropagation();
+      onMove(id);
+    },
+    [id, onMove]
+  );
+
+  const handleDelete = useCallback(
+    (e) => {
+      e.stopPropagation();
+      onDelete(id);
+    },
+    [id, onDelete]
+  );
+
+  const handleClick = useCallback((e) => e.stopPropagation(), []);
+
   return (
     <div
       ref={setNodeRef}
@@ -38,16 +56,13 @@ const TodoItem = ({
       {!isInProgress && !isCompletedList && (
         <button
           className={`${styles.moveButton} ${styles.moveLeft}`}
-          onClick={(e) => {
-            e.stopPropagation();
-            onMove(id);
-          }}
+          onClick={handleMove}
           title="진행 중인 작업으로 이동"
         >
           <FaArrowLeft />
         </button>
       )}
-      <label className={styles.checkbox} onClick={(e) => e.stopPropagation()}>
+      <label className={styles.checkbox} onClick={handleClick}>
         <input type="checkbox" checked={isCompleted} onChange={onToggle} />
         <span className={styles.checkmark}></span>
       </label>
@@ -57,22 +72,13 @@ const TodoItem = ({
       {isInProgress && !isCompletedList && (
         <button
           className={`${styles.moveButton} ${styles.moveRight}`}
-          onClick={(e) => {
-            e.stopPropagation();
-            onMove(id);
-          }}
+          onClick={handleMove}
           title="오늘 할 작업으로 이동"
         >
           <FaArrowRight />
         </button>
       )}
-      <button
-        className={styles.deleteButton}
-        onClick={(e) => {
-          e.stopPropagation();
-          onDelete(id);
-        }}
-      >
+      <button className={styles.deleteButton} onClick={handleDelete}>
         <FaTrash />
       </button>
     </div>

@@ -40,5 +40,3 @@ todo: 날짜 단위로 초기화 및 기록 - firebase or 앞으로도 사용할
 
 todo: 다크모드
 todo: 챗봇 = 관리자에게 원하는 추가사항 건의
-todo: 타이머 progress bar
-todo: 마지막 작업 종료 메세지 변경

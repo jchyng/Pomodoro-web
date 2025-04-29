@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useCallback } from "react";
 import {
   SortableContext,
   verticalListSortingStrategy,
@@ -27,13 +27,16 @@ const TodoList = ({
     id: id,
   });
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (newTodo.trim()) {
-      onAdd(newTodo.trim());
-      setNewTodo("");
-    }
-  };
+  const handleSubmit = useCallback(
+    (e) => {
+      e.preventDefault();
+      if (newTodo.trim()) {
+        onAdd(newTodo.trim());
+        setNewTodo("");
+      }
+    },
+    [newTodo, onAdd]
+  );
 
   return (
     <div className={styles.todoList}>

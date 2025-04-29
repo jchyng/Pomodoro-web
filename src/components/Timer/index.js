@@ -14,168 +14,29 @@ import {
   sendGAEvent,
 } from "../../utils";
 
-const Timer = ({ onBreakEnd }) => {
-  const savedSettings = loadSettingsFromStorage();
-  const savedTimerState = loadTimerState();
+// 상수 정의
+const TIMER_UPDATE_INTERVAL = 100;
+const NOTIFICATION_MESSAGES = {
+  WORK_COMPLETE: {
+    title: "작업 시간 종료!",
+    message: "잠시 휴식을 취하고 다음 작업을 준비해보세요. 😊",
+  },
+  BREAK_COMPLETE: {
+    title: "휴식 시간 종료!",
+    message: "다시 작업을 시작할 시간이에요. 화이팅! 💪",
+  },
+};
 
+// 설정 관련 훅
+const useTimerSettings = () => {
+  const savedSettings = loadSettingsFromStorage();
   const [workTime, setWorkTime] = useState(savedSettings.workTime);
   const [breakTime, setBreakTime] = useState(savedSettings.breakTime);
-  const [time, setTime] = useState(savedTimerState.time);
   const [targetPomodoro, setTargetPomodoro] = useState(
     savedSettings.targetPomodoro
   );
-  const [nowPomodoro, setNowPomodoro] = useState(loadNowPomodoro());
-  const [isRunning, setIsRunning] = useState(savedTimerState.isRunning);
-  const [isBreakTime, setIsBreakTime] = useState(savedTimerState.isBreakTime);
   const [isAuto, setIsAuto] = useState(savedSettings.isAuto);
-  const lastUpdateTimeRef = useRef(Date.now());
-  const [displayTime, setDisplayTime] = useState(time);
 
-  // 시간 포맷팅
-  const formatTime = (seconds) => {
-    const minutes = Math.floor(seconds / 60);
-    const remainingSeconds = Math.floor(seconds % 60);
-    return `${minutes.toString().padStart(2, "0")}:${remainingSeconds
-      .toString()
-      .padStart(2, "0")}`;
-  };
-
-  // 작업 시간 완료 처리
-  const handleWorkComplete = useCallback(() => {
-    showNotification(
-      "작업 시간 종료!",
-      "잠시 휴식을 취하고 다음 작업을 준비해보세요. 😊"
-    );
-
-    const newPomodoro = nowPomodoro + 1;
-    setNowPomodoro(newPomodoro);
-    saveNowPomodoro(newPomodoro);
-    setTime(breakTime * 60);
-    setIsBreakTime(true);
-
-    // 뽀모도로 완료 이벤트 추적
-    sendGAEvent("pomodoro_completed", {
-      pomodoro: newPomodoro,
-      work_duration: workTime,
-    });
-  }, [nowPomodoro, workTime, breakTime]);
-
-  // 휴식 시간 완료 처리
-  const handleBreakComplete = useCallback(() => {
-    showNotification(
-      "휴식 시간 종료!",
-      "다시 작업을 시작할 시간이에요. 화이팅! 💪"
-    );
-    setTime(workTime * 60);
-    setIsBreakTime(false);
-    onBreakEnd();
-
-    // 휴식 시간 종료 이벤트 추적
-    sendGAEvent("break_completed", {
-      break_duration: breakTime,
-    });
-  }, [workTime, breakTime, onBreakEnd]);
-
-  //====================  S: Settings 핸들러 =======================//
-  // 작업 시간 변경 이벤트 핸들러
-  const handleWorkTimeChange = (e) => {
-    const value = parseInt(e.target.value);
-    if (!isNaN(value) && value > 0) {
-      setWorkTime(value);
-      if (!isRunning && !isBreakTime) {
-        setTime(value * 60);
-        setDisplayTime(value * 60);
-      }
-      // 작업 시간 변경 이벤트만 전송
-      sendGAEvent("settings_changed", {
-        work_time: value,
-      });
-    }
-  };
-
-  // 휴식 시간 변경 이벤트 핸들러
-  const handleBreakTimeChange = (e) => {
-    const value = parseInt(e.target.value);
-    if (!isNaN(value) && value > 0) {
-      setBreakTime(value);
-      if (!isRunning && isBreakTime) {
-        setTime(value * 60);
-        setDisplayTime(value * 60);
-      }
-      // 휴식 시간 변경 이벤트만 전송
-      sendGAEvent("settings_changed", {
-        break_time: value,
-      });
-    }
-  };
-
-  // 포모도로 완료 횟수 변경 이벤트 핸들러
-  const handleTargetPomodoroChange = (e) => {
-    const value = parseInt(e.target.value);
-    if (!isNaN(value) && value > 0) {
-      setTargetPomodoro(value);
-      sendGAEvent("settings_changed", {
-        target_pomodoro: value,
-      });
-    }
-  };
-
-  // 자동 시작 설정 변경 핸들러
-  const handleAutoToggle = () => {
-    const newIsAuto = !isAuto;
-    setIsAuto(newIsAuto);
-    // 자동 시작 설정 변경 이벤트만 전송
-    sendGAEvent("settings_changed", {
-      is_auto: newIsAuto,
-    });
-  };
-
-  //====================  S: controls 핸들러 =======================//
-  // 전체 초기화 버튼 핸들러 수정
-  const handleFullReset = () => {
-    setIsRunning(false);
-    setTime(workTime * 60);
-    setIsBreakTime(false);
-    setNowPomodoro(0);
-    saveNowPomodoro(0);
-    // 타이머 상태도 초기화
-    saveTimerState({
-      time: workTime * 60,
-      isBreakTime: false,
-      isRunning: false,
-    });
-  };
-
-  // 타이머 시작/일시정지 이벤트 추적
-  const handleTimerToggle = () => {
-    const newIsRunning = !isRunning;
-    setIsRunning(newIsRunning);
-
-    if (newIsRunning) {
-      // 타이머 시작 시 정확한 시간 설정
-      lastUpdateTimeRef.current = Date.now();
-      setDisplayTime(time);
-    }
-
-    sendGAEvent("timer_" + (newIsRunning ? "start" : "pause"), {
-      is_break: isBreakTime,
-      remaining_time: time,
-    });
-  };
-
-  // 현재 시간 초기화 핸들러
-  const handleResetNowTime = () => {
-    setIsRunning(false);
-    setTime(isBreakTime ? breakTime * 60 : workTime * 60);
-  };
-
-  //====================  S:useEffect =======================//
-  // 알림 권한 요청
-  useEffect(() => {
-    requestNotificationPermission();
-  }, []);
-
-  // 설정이 변경될 때마다 저장
   useEffect(() => {
     saveSettingsToStorage({
       workTime,
@@ -185,7 +46,28 @@ const Timer = ({ onBreakEnd }) => {
     });
   }, [workTime, breakTime, targetPomodoro, isAuto]);
 
-  // 타이머 상태 저장
+  return {
+    workTime,
+    setWorkTime,
+    breakTime,
+    setBreakTime,
+    targetPomodoro,
+    setTargetPomodoro,
+    isAuto,
+    setIsAuto,
+  };
+};
+
+// 타이머 상태 관련 훅
+const useTimerState = (workTime, breakTime) => {
+  const savedTimerState = loadTimerState();
+  const [time, setTime] = useState(savedTimerState.time);
+  const [isRunning, setIsRunning] = useState(savedTimerState.isRunning);
+  const [isBreakTime, setIsBreakTime] = useState(savedTimerState.isBreakTime);
+  const [nowPomodoro, setNowPomodoro] = useState(loadNowPomodoro());
+  const [displayTime, setDisplayTime] = useState(time);
+  const lastUpdateTimeRef = useRef(Date.now());
+
   useEffect(() => {
     saveTimerState({
       time,
@@ -194,24 +76,215 @@ const Timer = ({ onBreakEnd }) => {
     });
   }, [time, isBreakTime, isRunning]);
 
-  // 타이틀 업데이트
-  const updateTitle = (remainingTime) => {
-    const title = isBreakTime ? "휴식 시간" : "작업 시간";
-    document.title = `${formatTime(remainingTime)} - ${title}`;
+  return {
+    time,
+    setTime,
+    isRunning,
+    setIsRunning,
+    isBreakTime,
+    setIsBreakTime,
+    nowPomodoro,
+    setNowPomodoro,
+    displayTime,
+    setDisplayTime,
+    lastUpdateTimeRef,
   };
+};
+
+const Timer = ({ onBreakEnd }) => {
+  const {
+    workTime,
+    setWorkTime,
+    breakTime,
+    setBreakTime,
+    targetPomodoro,
+    setTargetPomodoro,
+    isAuto,
+    setIsAuto,
+  } = useTimerSettings();
+
+  const {
+    time,
+    setTime,
+    isRunning,
+    setIsRunning,
+    isBreakTime,
+    setIsBreakTime,
+    nowPomodoro,
+    setNowPomodoro,
+    displayTime,
+    setDisplayTime,
+    lastUpdateTimeRef,
+  } = useTimerState(workTime, breakTime);
+
+  // 시간 포맷팅
+  const formatTime = useCallback((seconds) => {
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = Math.floor(seconds % 60);
+    return `${minutes.toString().padStart(2, "0")}:${remainingSeconds
+      .toString()
+      .padStart(2, "0")}`;
+  }, []);
+
+  // 작업 시간 완료 처리
+  const handleWorkComplete = useCallback(() => {
+    showNotification(
+      NOTIFICATION_MESSAGES.WORK_COMPLETE.title,
+      NOTIFICATION_MESSAGES.WORK_COMPLETE.message
+    );
+
+    const newPomodoro = nowPomodoro + 1;
+    setNowPomodoro(newPomodoro);
+    saveNowPomodoro(newPomodoro);
+    setTime(breakTime * 60);
+    setIsBreakTime(true);
+
+    sendGAEvent("pomodoro_completed", {
+      pomodoro: newPomodoro,
+      work_duration: workTime,
+    });
+  }, [
+    nowPomodoro,
+    workTime,
+    breakTime,
+    setNowPomodoro,
+    setTime,
+    setIsBreakTime,
+  ]);
+
+  // 휴식 시간 완료 처리
+  const handleBreakComplete = useCallback(() => {
+    showNotification(
+      NOTIFICATION_MESSAGES.BREAK_COMPLETE.title,
+      NOTIFICATION_MESSAGES.BREAK_COMPLETE.message
+    );
+    setTime(workTime * 60);
+    setIsBreakTime(false);
+    onBreakEnd();
+
+    sendGAEvent("break_completed", {
+      break_duration: breakTime,
+    });
+  }, [workTime, breakTime, onBreakEnd, setTime, setIsBreakTime]);
+
+  // 설정 변경 핸들러
+  const handleWorkTimeChange = useCallback(
+    (e) => {
+      const value = parseInt(e.target.value);
+      if (!isNaN(value) && value > 0) {
+        setWorkTime(value);
+        if (!isRunning && !isBreakTime) {
+          setTime(value * 60);
+          setDisplayTime(value * 60);
+        }
+        sendGAEvent("settings_changed", { work_time: value });
+      }
+    },
+    [isRunning, isBreakTime, setWorkTime, setTime, setDisplayTime]
+  );
+
+  const handleBreakTimeChange = useCallback(
+    (e) => {
+      const value = parseInt(e.target.value);
+      if (!isNaN(value) && value > 0) {
+        setBreakTime(value);
+        if (!isRunning && isBreakTime) {
+          setTime(value * 60);
+          setDisplayTime(value * 60);
+        }
+        sendGAEvent("settings_changed", { break_time: value });
+      }
+    },
+    [isRunning, isBreakTime, setBreakTime, setTime, setDisplayTime]
+  );
+
+  const handleTargetPomodoroChange = useCallback(
+    (e) => {
+      const value = parseInt(e.target.value);
+      if (!isNaN(value) && value > 0) {
+        setTargetPomodoro(value);
+        sendGAEvent("settings_changed", { target_pomodoro: value });
+      }
+    },
+    [setTargetPomodoro]
+  );
+
+  const handleAutoToggle = useCallback(() => {
+    const newIsAuto = !isAuto;
+    setIsAuto(newIsAuto);
+    sendGAEvent("settings_changed", { is_auto: newIsAuto });
+  }, [isAuto, setIsAuto]);
+
+  // 타이머 컨트롤 핸들러
+  const handleFullReset = useCallback(() => {
+    setIsRunning(false);
+    setTime(workTime * 60);
+    setIsBreakTime(false);
+    setNowPomodoro(0);
+    saveNowPomodoro(0);
+    saveTimerState({
+      time: workTime * 60,
+      isBreakTime: false,
+      isRunning: false,
+    });
+  }, [workTime, setIsRunning, setTime, setIsBreakTime, setNowPomodoro]);
+
+  const handleTimerToggle = useCallback(() => {
+    const newIsRunning = !isRunning;
+    setIsRunning(newIsRunning);
+
+    if (newIsRunning) {
+      lastUpdateTimeRef.current = Date.now();
+      setDisplayTime(time);
+    }
+
+    sendGAEvent("timer_" + (newIsRunning ? "start" : "pause"), {
+      is_break: isBreakTime,
+      remaining_time: time,
+    });
+  }, [
+    isRunning,
+    isBreakTime,
+    time,
+    setIsRunning,
+    lastUpdateTimeRef,
+    setDisplayTime,
+  ]);
+
+  const handleResetNowTime = useCallback(() => {
+    setIsRunning(false);
+    setTime(isBreakTime ? breakTime * 60 : workTime * 60);
+  }, [isBreakTime, breakTime, workTime, setIsRunning, setTime]);
+
+  // 타이틀 업데이트
+  const updateTitle = useCallback(
+    (remainingTime) => {
+      const title = isBreakTime ? "휴식 시간" : "작업 시간";
+      document.title = `${formatTime(remainingTime)} - ${title}`;
+    },
+    [isBreakTime, formatTime]
+  );
 
   // 타이머 상태 업데이트
-  const updateTimerState = (remaining) => {
-    setTime(remaining);
-    setDisplayTime(remaining);
-    updateTitle(remaining);
-  };
+  const updateTimerState = useCallback(
+    (remaining) => {
+      setTime(remaining);
+      setDisplayTime(remaining);
+      updateTitle(remaining);
+    },
+    [updateTitle, setTime, setDisplayTime]
+  );
 
   // 타이머 종료 처리
-  const handleTimerComplete = () => {
+  const handleTimerComplete = useCallback(() => {
     updateTimerState(0);
     setIsRunning(false);
-  };
+  }, [updateTimerState, setIsRunning]);
+
+  // 알림 권한 요청
+  useEffect(() => {
+    requestNotificationPermission();
+  }, []);
 
   // 타이머 실행
   useEffect(() => {
@@ -235,7 +308,7 @@ const Timer = ({ onBreakEnd }) => {
       startTime = Date.now();
       expectedTime = time;
       updateTimerState(time);
-      timerInterval = setInterval(updateTimer, 100);
+      timerInterval = setInterval(updateTimer, TIMER_UPDATE_INTERVAL);
     } else {
       updateTimerState(time);
     }
@@ -245,7 +318,7 @@ const Timer = ({ onBreakEnd }) => {
         clearInterval(timerInterval);
       }
     };
-  }, [isRunning, time, isBreakTime]);
+  }, [isRunning, time, isBreakTime, updateTimerState, handleTimerComplete]);
 
   // 타이머 종료 후 처리
   useEffect(() => {
@@ -256,13 +329,13 @@ const Timer = ({ onBreakEnd }) => {
         handleWorkComplete();
       }
 
-      // 목표 횟수에 도달했을 때 자동 실행 정지
       if (nowPomodoro === targetPomodoro) {
         setIsAuto(false);
       } else if (isAuto) {
         const nextTime = isBreakTime ? workTime * 60 : breakTime * 60;
         setTime(nextTime);
         setDisplayTime(nextTime);
+        lastUpdateTimeRef.current = Date.now();
         setIsRunning(true);
       }
     }
@@ -277,16 +350,21 @@ const Timer = ({ onBreakEnd }) => {
     breakTime,
     nowPomodoro,
     targetPomodoro,
+    setIsAuto,
+    setTime,
+    setDisplayTime,
+    lastUpdateTimeRef,
+    setIsRunning,
   ]);
 
-  // 프로그레스 계산 함수 수정
-  const calculateProgress = () => {
+  // 프로그레스 계산
+  const calculateProgress = useCallback(() => {
     const totalTime = isBreakTime ? breakTime * 60 : workTime * 60;
     return (time / totalTime) * 100;
-  };
+  }, [isBreakTime, breakTime, workTime, time]);
 
   // SVG 원형 프로그레스 바 컴포넌트
-  const CircularProgress = () => {
+  const CircularProgress = useCallback(() => {
     const progress = calculateProgress();
     const radius = 140;
     const circumference = 2 * Math.PI * radius;
@@ -323,7 +401,7 @@ const Timer = ({ onBreakEnd }) => {
         />
       </svg>
     );
-  };
+  }, [isRunning, isBreakTime, calculateProgress]);
 
   return (
     <div
